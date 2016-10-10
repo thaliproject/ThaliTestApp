@@ -13,23 +13,23 @@ var ExpressPouchDB          = require('express-pouchdb'),
     keysToUse;
 
 console.log('TestApp create keys');
-var ecdhS7 = crypto.createECDH('secp256k1');
-ecdhS7.generateKeys();
-ecdhS7.setPublicKey('BNTJE6l6zcgm9yLjRyXn8Z1f2jA5m/60gYIDaJxiLDYJMUmV/5LJMHBSA9RVmjp9tyWQWkn0BWk6cvQiWpt86IE=', 'base64');
-ecdhS7.setPrivateKey('24lf26NsRnaxvruH3ui73q5vDGYb0phrJVdgUngOFp8=', 'base64');
+var ecdh1 = crypto.createECDH('secp256k1');
+ecdh1.generateKeys();
+ecdh1.setPublicKey('BNTJE6l6zcgm9yLjRyXn8Z1f2jA5m/60gYIDaJxiLDYJMUmV/5LJMHBSA9RVmjp9tyWQWkn0BWk6cvQiWpt86IE=', 'base64');
+ecdh1.setPrivateKey('24lf26NsRnaxvruH3ui73q5vDGYb0phrJVdgUngOFp8=', 'base64');
 
-var ecdhS6 = crypto.createECDH('secp256k1');
-ecdhS6.generateKeys();
-ecdhS6.setPublicKey('BHaqGoN4VGmYUmK2kJ0UME36mBSKfcp9uXYvnxBLvwCLie05ieFCGJI2wGNkCplMDa7Wm18Y4b69rL7fkKFCFM8=', 'base64');
-ecdhS6.setPrivateKey('xRqiCIH1ka1omulZOzQxYJsX1IQOZRALu0+3miOuf2I=', 'base64');
+var ecdh2 = crypto.createECDH('secp256k1');
+ecdh2.generateKeys();
+ecdh2.setPublicKey('BHaqGoN4VGmYUmK2kJ0UME36mBSKfcp9uXYvnxBLvwCLie05ieFCGJI2wGNkCplMDa7Wm18Y4b69rL7fkKFCFM8=', 'base64');
+ecdh2.setPrivateKey('xRqiCIH1ka1omulZOzQxYJsX1IQOZRALu0+3miOuf2I=', 'base64');
 
-// S7
-var ecdh = ecdhS7;
-keysToUse = [ecdhS6.getPublicKey()];
+// Phone 1
+var ecdh = ecdh1;
+keysToUse = [ecdh2.getPublicKey()];
 
-// S6
-// var ecdh = ecdhS6;
-// keysToUse = [ecdhS7.getPublicKey()];
+// Phone 2
+// var ecdh = ecdh2;
+// keysToUse = [ecdh1.getPublicKey()];
 
 console.log('TestApp get path');
 var dbPrefix;
