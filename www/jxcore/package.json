@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
   "dependencies": {
     "express-pouchdb": "1.0.5-thali",
     "leveldown-mobile": "1.1.1",
