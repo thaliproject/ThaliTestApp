@@ -1,3 +1,8 @@
+NVM_NODEJS_ORG_MIRROR=https://jxcore.azureedge.net
+export NVM_NODEJS_ORG_MIRROR
+JX_NPM_JXB=jxb311
+export JX_NPM_JXB
+
 mkdir -p thaliDontCheckIn/localdev
 cordova platform add android
 cd www/jxcore
