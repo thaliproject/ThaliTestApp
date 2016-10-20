@@ -15,17 +15,22 @@ Custom express-pouchdb (1.0.5-thali) must be available.
 `./prepare.sh`
 1. Now you can build the cordova app using command:
 `cordova build android --device`
-**NOTE:** You need to build the app for each device separately using different set of ECDH keys for each device.
-You need to manually modify file www/jxcore/app.js by commenting out lines for Phone 1 or for Phone 2:
-    ```
-    // Phone 1
-    // var ecdh = ecdh1;
-    // keysToUse = [ecdh2.getPublicKey()];
-    
-    // Phone 2
-    var ecdh = ecdh2;
-    keysToUse = [ecdh1.getPublicKey()];
-    ```
-    Before each build it may be necessary to delete platforms/android/gradle.properties file.
-1. After installing the application on device remember to add needed permission by executing:
-`adb -s <DEVICE_ID> shell pm grant com.example.ThaliTestApp android.permission.ACCESS_COARSE_LOCATION`
+**NOTE:** Before each build it may be necessary to delete platforms/android/gradle.properties file.
+
+# Run instructions #
+1. On first run you will be asked for location permissions - it must be granted
+if you want to use native mode.
+1. When app starts on two devices select mode (WiFi or Native) on both devices using buttons. 
+1. On both devices init Thali - you must use button Init Thali #1 on first device
+and Init Thali #2 on second device in order to have Thali working
+(related to ECDH keys used by devices).
+1. Now you can start/stop Thali on both devices using buttons Start Thali and Stop Thali.
+1. Button Add data adds data to local PouchDB. The added document content is:
+   `[<ID>] TEST DATA #<SEQ>`
+   where <ID> is id of device that created this document (corresponding to number used by Init Thali button),
+   <SEQ> is sequential number of document created by gived device.
+   In the LAST CHANGE field you may see the last change reported by PouchDB
+   (TIME RECEIVED shows time when the change was received).
+   This way you may check if the replication is working. Note that also your own changes are
+   logged in LAST CHANGE. The 
+ 

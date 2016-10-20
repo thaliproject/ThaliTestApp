@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+var thaliMode = 'native';
+
 var app = {
     // Application Constructor
     initialize: function() {
@@ -35,9 +38,19 @@ var app = {
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
         jxcore.isReady(function() {
-            jxcore('app.js').loadMainFile(function(ret, err) {
-                console.log('jxcore loaded');
-            });
+            if (window.ThaliPermissions) {
+                // requestLocationPermission ensures that the application has
+                // the required ACCESS_COARSE_LOCATION permission in Android.
+                window.ThaliPermissions.requestLocationPermission(function () {
+                    console.log('Application has the required permission.');
+                    jxcore('app.js').loadMainFile(function(ret, err) {
+                        console.log('jxcore loaded');
+                        app.registerFunctions();
+                    });
+                }, function (error) {
+                    console.log('Location permission not granted. Error: ' + error);
+                });
+            }
         });
     },
     // Update DOM on a Received Event
@@ -45,12 +58,53 @@ var app = {
         var parentElement = document.getElementById(id);
         var listeningElement = parentElement.querySelector('.listening');
         var receivedElement = parentElement.querySelector('.received');
-
         listeningElement.setAttribute('style', 'display:none;');
         receivedElement.setAttribute('style', 'display:block;');
-
         console.log('Received Event: ' + id);
+    },
+    registerFunctions: function () {
+        jxcore('dbChange').register(function (change) {
+            var parentElement = document.getElementById('changes');
+            var lastChangeElement = parentElement.querySelector('.lastchange');
+            var changeTimeElement = parentElement.querySelector('.changetime');
+            lastChangeElement.innerHTML = change;
+            changeTimeElement.innerHTML = new Date().toLocaleTimeString();
+        });
     }
+
 };
+
+function initThali (deviceId) {
+    jxcore('initThali').call(deviceId, thaliMode, function () {
+        console.log('Thali initialized for device #' + deviceId);
+    });
+}
+
+function startThali () {
+    jxcore('startThali').call(function () {
+        console.log('Thali started');
+    });
+}
+
+function stopThali () {
+    jxcore('stopThali').call(function () {
+        console.log('Thali stopped');
+    });
+}
+
+var dataCounter = 0;
+function addData () {
+    jxcore('addData').call('Test data #' + dataCounter, function () {});
+    dataCounter++;
+}
+
+function setMode (mode) {
+    var currentModeElement = document.getElementById(thaliMode);
+    var newModeElement = document.getElementById(mode);
+    currentModeElement.setAttribute('style', 'background-color:initial;');
+    newModeElement.setAttribute('style', 'background-color:green;');
+
+    thaliMode = mode;
+}
 
 app.initialize();
