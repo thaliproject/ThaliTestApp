@@ -3,7 +3,7 @@ console.log('TestApp started');
 var ExpressPouchDB          = require('express-pouchdb'),
     PouchDB                 = require('pouchdb'),
     PouchDBGenerator        = require('thali/NextGeneration/utils/pouchDBGenerator'),
-    ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
+    ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolOneAtATime'),
     ThaliReplicationManager = require('thali/NextGeneration/thaliManager'),
     ThaliMobile             = require('thali/NextGeneration/thaliMobile'),
     crypto                  = require('crypto'),
@@ -115,5 +115,11 @@ Mobile('addData').registerSync(function (data) {
         "_id": "TestDoc" + (new Date().toString()),
         "content": "[" + myDeviceId + "] " + data
     };
-    localDB.put(doc);
+    localDB.put(doc)
+        .then(function () {
+            console.log("TestApp inserted doc");
+        })
+        .catch(function (err) {
+            console.log("TestApp error while adding data: " + err);
+        });
 });
