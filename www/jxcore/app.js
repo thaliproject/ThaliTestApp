@@ -1,9 +1,29 @@
 console.log('TestApp started');
 
+process
+.once('uncaughtException', function (error) {
+  console.error(
+    'uncaught exception, error: \'%s\', stack: \'%s\'',
+    error.toString(), error.stack
+  );
+  process.exit(1);
+})
+.once('unhandledRejection', function (error, p) {
+  console.error(
+    'uncaught promise rejection, error: \'%s\', stack: \'%s\'',
+    error.toString(), error.stack
+  );
+  process.exit(2);
+})
+.once('exit', function (code, signal) {
+  console.log('process exited, code: \'%s\', signal: \'%s\'', code, signal);
+});
+
 var ExpressPouchDB          = require('express-pouchdb'),
     PouchDB                 = require('pouchdb'),
     PouchDBGenerator        = require('thali/NextGeneration/utils/pouchDBGenerator'),
-    ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolOneAtATime'),
+    //ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
+    ThaliPeerPoolOneAtATime = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolOneAtATime'),
     ThaliReplicationManager = require('thali/NextGeneration/thaliManager'),
     ThaliMobile             = require('thali/NextGeneration/thaliMobile'),
     crypto                  = require('crypto'),
@@ -70,7 +90,8 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 PouchDB,
                 'testdb',
                 ecdh,
-                new ThaliPeerPoolDefault(),
+                //new ThaliPeerPoolDefault(),
+                new ThaliPeerPoolOneAtATime(),
                 thaliMode);
 
             localDB = new PouchDB('testdb');
@@ -111,15 +132,16 @@ Mobile('stopThali').registerSync(function () {
 });
 
 Mobile('addData').registerSync(function (data) {
+    var time = process.hrtime();
     var doc = {
-        "_id": "TestDoc" + (new Date().toString()),
+        "_id": "TestDoc-" + (time[0] + time[1] / 1e9),
         "content": "[" + myDeviceId + "] " + data
     };
     localDB.put(doc)
         .then(function () {
             console.log("TestApp inserted doc");
         })
-        .catch(function (err) {
-            console.log("TestApp error while adding data: " + err);
+        .catch(function (error) {
+            console.log("TestApp error while adding data: \'%s\'", error);
         });
 });
