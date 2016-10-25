@@ -7,6 +7,8 @@ export NVM_NODEJS_ORG_MIRROR
 JX_NPM_JXB=jxb311
 export JX_NPM_JXB
 
+../Thali_CordovaPlugin/thali/install/setUpDesktop.sh
+
 mkdir -p thaliDontCheckIn/localdev
 cordova platform add android
 cd www/jxcore
