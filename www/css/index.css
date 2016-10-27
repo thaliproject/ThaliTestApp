@@ -47,24 +47,30 @@ body {
 
 /* Portrait layout (default) */
 .app {
-    background:url(../img/logo.png) no-repeat center top; /* 170px x 200px */
-    position:absolute;             /* position in the center of the screen */
-    left:50%;
-    top:50%;
-    height:50px;                   /* text area height */
-    width:225px;                   /* text area width */
-    text-align:center;
-    padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
+    padding-top: 190px;
+    text-align: center;
+
+    background: url('../img/logo.png') no-repeat center 10px;
+
+    /* background:url(../img/logo.png) no-repeat center top; 170px x 200px */
+    /* position:absolute; position in the center of the screen */
+    /* left:50%; */
+    /* top:50%; */
+    /* height:50px; text area height */
+    /* width:225px; text area width */
+    /* text-align:center; */
+
+    /* padding: 180px 0px 0px 0px;     image height is 200px (bottom 20px are overlapped with text) */
+    /* margin : -115px 0px 0px -112px; offset vertical: half of image height and text area height */
     /* offset horizontal: half of text area width */
 }
 
 /* Landscape layout (with min-width) */
 @media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
     .app {
-        background-position:left center;
-        padding:75px 0px 75px 170px;  /* padding-top + padding-bottom + text area = image height */
-        margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
+        /* background-position:left center; */
+        /* padding:75px 0px 75px 170px;  padding-top + padding-bottom + text area = image height */
+        /* margin:-90px 0px 0px -198px;  offset vertical: half of image height */
         /* offset horizontal: half of image width and text area width */
     }
 }
@@ -118,10 +124,17 @@ h1 {
     margin-top: 10px;
 }
 
-button {
-    margin: 3px;
+.buttons {
+    margin-bottom: 20px;
 }
-
-button.activemode {
+.buttons button {
+    margin   : 10px;
+    padding  : 5px 15px;
+    font-size: 2em;
+}
+.buttons hr {
+  margin: 10px 5px;
+}
+.buttons button.activemode {
     background-color: green;
 }

@@ -98,6 +98,12 @@ function addData () {
     dataCounter++;
 }
 
+function testByNumber (number) {
+  jxcore('test' + number).call(function () {
+    console.log('test %d finished', number);
+  });
+}
+
 function setMode (mode) {
     var currentModeElement = document.getElementById(thaliMode);
     var newModeElement = document.getElementById(mode);

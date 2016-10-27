@@ -1,3 +1,5 @@
+'use strict';
+
 console.log('TestApp started');
 
 process
@@ -35,6 +37,8 @@ var ExpressPouchDB          = require('express-pouchdb'),
     localDB,
     localDBchanges,
     myDeviceId = 0;
+
+var Promise = require('bluebird');
 
 var ecdh1 = crypto.createECDH('secp256k1');
 ecdh1.generateKeys();
@@ -134,14 +138,219 @@ Mobile('stopThali').registerSync(function () {
 Mobile('addData').registerSync(function (data) {
     var time = process.hrtime();
     var doc = {
-        "_id": "TestDoc-" + (time[0] + time[1] / 1e9),
-        "content": "[" + myDeviceId + "] " + data
+        '_id': 'TestDoc-' + (time[0] + time[1] / 1e9),
+        'content': '[' + myDeviceId + '] ' + data
     };
     localDB.put(doc)
         .then(function () {
-            console.log("TestApp inserted doc");
+            console.log('TestApp inserted doc');
         })
         .catch(function (error) {
-            console.log("TestApp error while adding data: \'%s\'", error);
+            console.log('TestApp error while adding data: \'%s\'', error);
         });
+});
+
+
+var DOCS_COUNT             = 60;
+var DOC_SEND_TIMEOUT       = 1000;
+var DOC_SEARCH_TIMEOUT     = 2 * 60 * 1000;
+var NETWORK_TOGGLE_TIMEOUT = 1 * 60 * 1000;
+var SILENCE_TIMEOUT        = 4 * 60 * 1000;
+
+
+function waitForRemoteDocs(pouchDB, round, docsCount) {
+  function allDocsFound() {
+    // We want to find at least 'docsCount' documents.
+    return docsCount === 0;
+  }
+
+  function verifyDoc(doc) {
+    if (
+      doc.deviceId === undefined || doc.deviceId === null ||
+      doc.round    === undefined || doc.round    === null
+    ) {
+      // console.log('this is not our doc');
+    } else if (doc.deviceId === myDeviceId) {
+      // console.log('local doc found');
+    } else if (doc.round === round) {
+      docsCount--;
+      console.log('remote doc found, %d docs remaining', docsCount);
+    }
+  }
+
+  return new Promise(function (resolve, reject) {
+    var error;
+    var completed = false;
+    function complete () {
+      if (completed) {
+        return;
+      }
+      completed = true;
+
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    }
+    var changesFeed = pouchDB.changes({
+      since: 0,
+      live: true,
+      include_docs: true
+    })
+    .on('change', function (change) {
+      verifyDoc(change.doc);
+      if (allDocsFound()) {
+        changesFeed.cancel();
+      }
+    })
+    .on('complete', function (info) {
+      if (info.errors && info.errors.length > 0) {
+        error = info.errors[0];
+      }
+      complete();
+    })
+    .on('error', function (err) {
+      error = err;
+      complete();
+    });
+  });
+}
+
+function native (target, value) {
+  return new Promise(function (resolve, reject) {
+    Mobile(target).callNative(value, function (error) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+function sendData (round, wantToggleWiFi, wantToggleBluetooth) {
+  console.log('sending new docs');
+
+  function send(attempts, timeout) {
+    var time = process.hrtime();
+
+    return localDB.put({
+      _id     : 'TestDoc-' + (time[0] + time[1] / 1e9),
+      deviceId: myDeviceId,
+      round   : round
+    })
+      .then(function () {
+        console.log('sent new doc, round: %d', round);
+
+        if (attempts > 0) {
+          return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+              send(attempts - 1, timeout)
+                .then(resolve)
+                .catch(reject);
+            }, timeout);
+          });
+        }
+      });
+  }
+
+  return send(DOCS_COUNT, DOC_SEND_TIMEOUT)
+
+  .then(function () {
+    console.log('all docs sent, waiting for remote docs');
+
+    return new Promise(function (resolve, reject) {
+      waitForRemoteDocs(localDB, round, DOCS_COUNT)
+        .then(resolve)
+        .catch(reject);
+      setTimeout(function () {
+        reject('docs search timeout');
+      }, DOC_SEARCH_TIMEOUT);
+    });
+  })
+
+  .then(function () {
+    console.log('all docs found');
+
+    return new Promise(function (resolve) {
+      setTimeout(resolve, NETWORK_TOGGLE_TIMEOUT);
+    });
+  })
+
+  .then(function () {
+    console.log('disabling network');
+
+    var promises = [];
+    if (wantToggleWiFi) {
+      promises.push(native('setWifiRadioState', false));
+    }
+    if (wantToggleBluetooth) {
+      promises.push(native('toggleBluetooth', false));
+    }
+    return Promise.all(promises);
+  })
+
+  .then(function () {
+    console.log('doing nothing');
+
+    return new Promise(function (resolve) {
+      setTimeout(resolve, SILENCE_TIMEOUT);
+    });
+  })
+
+  .then(function () {
+    console.log('enabling network');
+
+    var promises = [];
+    if (wantToggleWiFi) {
+      promises.push(native('setWifiRadioState', true));
+    }
+    if (wantToggleBluetooth) {
+      promises.push(native('toggleBluetooth', true));
+    }
+    return Promise.all(promises);
+  });
+}
+
+function infiniteSendData (round, wantToggleWiFi, wantToggleBluetooth) {
+  if (!localDB) {
+    return Promise.reject('please provide a db instance');
+  }
+
+  return sendData(round, wantToggleWiFi, wantToggleBluetooth)
+
+  .then(function () {
+    return new Promise(function (resolve, reject) {
+      setImmediate(function () {
+        infiniteSendData(round + 1)
+          .then(resolve)
+          .catch(reject);
+      });
+    });
+  });
+}
+
+Mobile('test1').registerSync(function () {
+  infiniteSendData(0, false, false)
+  .catch(function (error) {
+    console.log('got error: \'%s\'', error);
+    process.exit(3);
+  });
+});
+
+Mobile('test2').registerSync(function () {
+  infiniteSendData(0, true, false)
+  .catch(function (error) {
+    console.log('got error: \'%s\'', error);
+    process.exit(4);
+  });
+});
+
+Mobile('test3').registerSync(function () {
+  infiniteSendData(0, true, true)
+  .catch(function (error) {
+    console.log('got error: \'%s\'', error);
+    process.exit(5);
+  });
 });
