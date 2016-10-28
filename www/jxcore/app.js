@@ -2,6 +2,8 @@
 
 console.log('TestApp started');
 
+process.env.DEBUG = 'thalisalti:acl';
+
 process
 .once('uncaughtException', function (error) {
   console.error(
@@ -147,6 +149,27 @@ Mobile('addData').registerSync(function (data) {
         })
         .catch(function (error) {
             console.log('TestApp error while adding data: \'%s\'', error);
+        });
+});
+
+var attachmentIndex = 0;
+
+Mobile('addAttachment').registerSync(function () {
+    var attachment = new Buffer('attachment/attachment:' + attachmentIndex + ':' + new Date());
+    attachmentIndex ++;
+
+    localDB
+    .putAttachment(
+      attachment.toString(),
+      'attachment',
+      attachment,
+      'text/plain'
+    )
+        .then(function () {
+            console.log('sent attachment');
+        })
+        .catch(function (error) {
+            console.error('got error: \'%s\'', error);
         });
 });
 

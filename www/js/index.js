@@ -98,6 +98,12 @@ function addData () {
     dataCounter++;
 }
 
+function addAttachment () {
+    jxcore('addAttachment').call(function () {
+        console.log('adding attachment');
+    });
+}
+
 function testByNumber (number) {
   jxcore('test' + number).call(function () {
     console.log('test %d finished', number);
