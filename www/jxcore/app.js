@@ -81,13 +81,25 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 timeout: false,
                 include_docs: true,
                 attachments: true,
+                binary: true,
                 batch_size: 40
             };
 
             var registerLocalDBChanges = function () {
-                return localDB.changes(options).on('change', function(data) {
-                    Mobile('dbChange').call(data.doc.content);
-                })
+                return localDB.changes(options)
+                    .on('change', function(data) {
+                        console.log("TestApp got " + data.doc._id);
+                        if (data.doc._id.indexOf("TestAtt") > -1) {
+                            localDB.getAttachment(data.doc._id, 'att.txt')
+                                .then(function (attachmentBuffer) {
+                                    Mobile('dbChange').call(attachmentBuffer.toString());
+                                }).catch(function (err) {
+                                console.log("TestApp error getting attachment: " + err);
+                            });
+                        } else {
+                            Mobile('dbChange').call(data.doc.content);
+                        }
+                    })
                     .on('error', function (err) {
                         console.log(err);
                         localDBchanges.cancel();
@@ -110,16 +122,29 @@ Mobile('stopThali').registerSync(function () {
     manager.stop();
 });
 
-Mobile('addData').registerSync(function (data) {
-    var doc = {
-        "_id": "TestDoc" + (new Date().toString()),
-        "content": "[" + myDeviceId + "] " + data
-    };
-    localDB.put(doc)
-        .then(function () {
-            console.log("TestApp inserted doc");
-        })
-        .catch(function (err) {
-            console.log("TestApp error while adding data: " + err);
+Mobile('addData').registerSync(function (data, addAttachment) {
+    var doc,
+        attachment;
+
+    if (addAttachment) {
+        attachment = new Buffer("Attachment from device #" + myDeviceId + ": " + data);
+        localDB.putAttachment("TestAtt" + (new Date().toString()), 'att.txt', attachment, 'text/plain')
+            .then(function (result) {
+                console.log("TestApp inserted attachment");
+            }).catch(function (err) {
+            console.log("TestApp error while adding attachment: " + err);
         });
+    } else {
+        doc = {
+            "_id": "TestDoc" + (new Date().toString()),
+            "content": "Data from device #" + myDeviceId + ": " + data
+        };
+        localDB.put(doc)
+            .then(function () {
+                console.log("TestApp inserted data");
+            })
+            .catch(function (err) {
+                console.log("TestApp error while adding data: " + err);
+            });
+    }
 });

@@ -107,12 +107,12 @@ function stopThali () {
 }
 
 var dataCounter = 0;
-function addData () {
+function addData (addAttachment) {
     if (!jxcoreLoaded) {
         alert("jxcore not loaded - please wait");
         return;
     }
-    jxcore('addData').call('Test data #' + dataCounter, function () {});
+    jxcore('addData').call('Test data #' + dataCounter, addAttachment, function () {});
     dataCounter++;
 }
 
