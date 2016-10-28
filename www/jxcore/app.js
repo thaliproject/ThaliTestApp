@@ -2,7 +2,7 @@
 
 console.log('TestApp started');
 
-process.env.DEBUG = 'thalisalti:acl';
+// process.env.DEBUG = 'thalisalti:acl';
 
 process
 .once('uncaughtException', function (error) {
