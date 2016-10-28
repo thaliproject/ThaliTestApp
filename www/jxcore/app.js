@@ -157,6 +157,12 @@ var DOC_SEARCH_TIMEOUT     = 2 * 60 * 1000;
 var NETWORK_TOGGLE_TIMEOUT = 1 * 60 * 1000;
 var SILENCE_TIMEOUT        = 4 * 60 * 1000;
 
+var TIMES_FASTER = 10;
+DOC_SEND_TIMEOUT       /= TIMES_FASTER;
+DOC_SEARCH_TIMEOUT     /= TIMES_FASTER;
+NETWORK_TOGGLE_TIMEOUT /= TIMES_FASTER;
+SILENCE_TIMEOUT        /= TIMES_FASTER;
+
 
 function waitForRemoteDocs(pouchDB, round, docsCount) {
   function allDocsFound() {
