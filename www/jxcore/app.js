@@ -108,13 +108,25 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 timeout: false,
                 include_docs: true,
                 attachments: true,
+                binary: true,
                 batch_size: 40
             };
 
             var registerLocalDBChanges = function () {
-                return localDB.changes(options).on('change', function(data) {
-                    Mobile('dbChange').call(data.doc.content);
-                })
+                return localDB.changes(options)
+                    .on('change', function(data) {
+                        console.log("TestApp got " + data.doc._id);
+                        if (data.doc._id.indexOf("TestAtt") > -1) {
+                            localDB.getAttachment(data.doc._id, 'att.txt')
+                                .then(function (attachmentBuffer) {
+                                    Mobile('dbChange').call(attachmentBuffer.toString());
+                                }).catch(function (err) {
+                                console.log("TestApp error getting attachment: " + err);
+                            });
+                        } else {
+                            Mobile('dbChange').call(data.doc.content);
+                        }
+                    })
                     .on('error', function (err) {
                         console.log(err);
                         localDBchanges.cancel();

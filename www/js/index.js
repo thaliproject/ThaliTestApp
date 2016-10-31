@@ -17,7 +17,8 @@
  * under the License.
  */
 
-var thaliMode = 'native';
+var thaliMode = 'native',
+    jxcoreLoaded = false;
 
 var app = {
     // Application Constructor
@@ -38,6 +39,7 @@ var app = {
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
         jxcore.isReady(function() {
+            app.registerFunctions();
             if (window.ThaliPermissions) {
                 // requestLocationPermission ensures that the application has
                 // the required ACCESS_COARSE_LOCATION permission in Android.
@@ -45,7 +47,7 @@ var app = {
                     console.log('Application has the required permission.');
                     jxcore('app.js').loadMainFile(function(ret, err) {
                         console.log('jxcore loaded');
-                        app.registerFunctions();
+                        jxcoreLoaded = true;
                     });
                 }, function (error) {
                     console.log('Location permission not granted. Error: ' + error);
@@ -75,36 +77,60 @@ var app = {
 };
 
 function initThali (deviceId) {
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
     jxcore('initThali').call(deviceId, thaliMode, function () {
         console.log('Thali initialized for device #' + deviceId);
     });
 }
 
 function startThali () {
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
     jxcore('startThali').call(function () {
         console.log('Thali started');
     });
 }
 
 function stopThali () {
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
     jxcore('stopThali').call(function () {
         console.log('Thali stopped');
     });
 }
 
 var dataCounter = 0;
-function addData () {
-    jxcore('addData').call('Test data #' + dataCounter, function () {});
+function addData (addAttachment) {
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
+    jxcore('addData').call('Test data #' + dataCounter, addAttachment, function () {});
     dataCounter++;
 }
 
 function addAttachment () {
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
     jxcore('addAttachment').call(function () {
         console.log('adding attachment');
     });
 }
 
 function testByNumber (number) {
+  if (!jxcoreLoaded) {
+      alert("jxcore not loaded - please wait");
+      return;
+  }
   jxcore('test' + number).call(function () {
     console.log('test %d finished', number);
   });
