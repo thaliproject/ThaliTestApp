@@ -1,3 +1,11 @@
+/*
+ * Typical usage:
+ *
+ * jx runOnDesktop.js 1 native &> logs/thali-1.log & \
+ * jx runOnDesktop.js 2 native &> logs/thali-2.log
+ *
+ */
+
 var deviceId = Number(process.argv[2]);
 var mode = process.argv[3] || 'native';
 
