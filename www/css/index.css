@@ -128,9 +128,9 @@ h1 {
     margin-bottom: 20px;
 }
 .buttons button {
-    margin   : 10px;
-    padding  : 5px 15px;
-    font-size: 2em;
+    margin   : 5px;
+    padding  : 5px 10px;
+    font-size: 1.8em;
 }
 .buttons hr {
   margin: 10px 5px;
