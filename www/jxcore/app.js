@@ -6,23 +6,23 @@ console.log('TestApp started');
 process.env.SSDP_NT = 'random-ssdp-nt:' + require('./SSDP');
 
 process
-.once('uncaughtException', function (error) {
-  console.error(
-    'uncaught exception, error: \'%s\', stack: \'%s\'',
-    error.toString(), error.stack
-  );
-  process.exit(1);
-})
-.once('unhandledRejection', function (error, p) {
-  console.error(
-    'uncaught promise rejection, error: \'%s\', stack: \'%s\'',
-    error.toString(), error.stack
-  );
-  process.exit(2);
-})
-.once('exit', function (code, signal) {
-  console.log('process exited, code: \'%s\', signal: \'%s\'', code, signal);
-});
+  .once('uncaughtException', function (error) {
+    console.error(
+      'uncaught exception, error: \'%s\', stack: \'%s\'',
+      error.toString(), error.stack
+    );
+    process.exit(1);
+  })
+  .once('unhandledRejection', function (error, p) {
+    console.error(
+      'uncaught promise rejection, error: \'%s\', stack: \'%s\'',
+      error.toString(), error.stack
+    );
+    process.exit(2);
+  })
+  .once('exit', function (code, signal) {
+    console.log('process exited, code: \'%s\', signal: \'%s\'', code, signal);
+  });
 
 var ExpressPouchDB          = require('express-pouchdb'),
     PouchDB                 = require('pouchdb'),
@@ -236,26 +236,25 @@ function waitForRemoteDocs(pouchDB, round, docsCount) {
       }
     }
     var changesFeed = pouchDB.changes({
-      since: 0,
       live: true,
       include_docs: true
     })
-    .on('change', function (change) {
-      verifyDoc(change.doc);
-      if (allDocsFound()) {
-        changesFeed.cancel();
-      }
-    })
-    .on('complete', function (info) {
-      if (info.errors && info.errors.length > 0) {
-        error = info.errors[0];
-      }
-      complete();
-    })
-    .on('error', function (err) {
-      error = err;
-      complete();
-    });
+      .on('change', function (change) {
+        verifyDoc(change.doc);
+        if (allDocsFound()) {
+          changesFeed.cancel();
+        }
+      })
+      .on('complete', function (info) {
+        if (info.errors && info.errors.length > 0) {
+          error = info.errors[0];
+        }
+        complete();
+      })
+      .on('error', function (err) {
+        error = err;
+        complete();
+      });
   });
 }
 
@@ -297,62 +296,60 @@ function sendData (round, wantToggleWiFi, wantToggleBluetooth) {
       });
   }
 
+  // We want to wait for remote docs before 'send' in order not to use 'since: 0'.
+  var waitPromise = waitForRemoteDocs(localDB, round, DOCS_COUNT);
+
   return send(DOCS_COUNT, DOC_SEND_TIMEOUT)
+    .then(function () {
+      console.log('all docs sent, waiting for remote docs');
 
-  .then(function () {
-    console.log('all docs sent, waiting for remote docs');
+      return new Promise(function (resolve, reject) {
+        waitPromise
+          .then(resolve)
+          .catch(reject);
+        setTimeout(function () {
+          reject('docs search timeout');
+        }, DOC_SEARCH_TIMEOUT);
+      });
+    })
+    .then(function () {
+      console.log('all docs found');
 
-    return new Promise(function (resolve, reject) {
-      waitForRemoteDocs(localDB, round, DOCS_COUNT)
-        .then(resolve)
-        .catch(reject);
-      setTimeout(function () {
-        reject('docs search timeout');
-      }, DOC_SEARCH_TIMEOUT);
+      return new Promise(function (resolve) {
+        setTimeout(resolve, NETWORK_TOGGLE_TIMEOUT);
+      });
+    })
+    .then(function () {
+      console.log('disabling network');
+
+      var promises = [];
+      if (wantToggleWiFi) {
+        promises.push(native('setWifiRadioState', false));
+      }
+      if (wantToggleBluetooth) {
+        promises.push(native('toggleBluetooth', false));
+      }
+      return Promise.all(promises);
+    })
+    .then(function () {
+      console.log('doing nothing');
+
+      return new Promise(function (resolve) {
+        setTimeout(resolve, SILENCE_TIMEOUT);
+      });
+    })
+    .then(function () {
+      console.log('enabling network');
+
+      var promises = [];
+      if (wantToggleWiFi) {
+        promises.push(native('setWifiRadioState', true));
+      }
+      if (wantToggleBluetooth) {
+        promises.push(native('toggleBluetooth', true));
+      }
+      return Promise.all(promises);
     });
-  })
-
-  .then(function () {
-    console.log('all docs found');
-
-    return new Promise(function (resolve) {
-      setTimeout(resolve, NETWORK_TOGGLE_TIMEOUT);
-    });
-  })
-
-  .then(function () {
-    console.log('disabling network');
-
-    var promises = [];
-    if (wantToggleWiFi) {
-      promises.push(native('setWifiRadioState', false));
-    }
-    if (wantToggleBluetooth) {
-      promises.push(native('toggleBluetooth', false));
-    }
-    return Promise.all(promises);
-  })
-
-  .then(function () {
-    console.log('doing nothing');
-
-    return new Promise(function (resolve) {
-      setTimeout(resolve, SILENCE_TIMEOUT);
-    });
-  })
-
-  .then(function () {
-    console.log('enabling network');
-
-    var promises = [];
-    if (wantToggleWiFi) {
-      promises.push(native('setWifiRadioState', true));
-    }
-    if (wantToggleBluetooth) {
-      promises.push(native('toggleBluetooth', true));
-    }
-    return Promise.all(promises);
-  });
 }
 
 function infiniteSendData (round, wantToggleWiFi, wantToggleBluetooth) {
@@ -361,38 +358,37 @@ function infiniteSendData (round, wantToggleWiFi, wantToggleBluetooth) {
   }
 
   return sendData(round, wantToggleWiFi, wantToggleBluetooth)
-
-  .then(function () {
-    return new Promise(function (resolve, reject) {
-      setImmediate(function () {
-        infiniteSendData(round + 1)
-          .then(resolve)
-          .catch(reject);
+    .then(function () {
+      return new Promise(function (resolve, reject) {
+        setImmediate(function () {
+          infiniteSendData(round + 1)
+            .then(resolve)
+            .catch(reject);
+        });
       });
     });
-  });
 }
 
 Mobile('test1').registerSync(function () {
   infiniteSendData(0, false, false)
-  .catch(function (error) {
-    console.log('got error: \'%s\'', error);
-    process.exit(3);
-  });
+    .catch(function (error) {
+      console.log('got error: \'%s\'', error);
+      process.exit(3);
+    });
 });
 
 Mobile('test2').registerSync(function () {
   infiniteSendData(0, true, false)
-  .catch(function (error) {
-    console.log('got error: \'%s\'', error);
-    process.exit(4);
-  });
+    .catch(function (error) {
+      console.log('got error: \'%s\'', error);
+      process.exit(4);
+    });
 });
 
 Mobile('test3').registerSync(function () {
   infiniteSendData(0, true, true)
-  .catch(function (error) {
-    console.log('got error: \'%s\'', error);
-    process.exit(5);
-  });
+    .catch(function (error) {
+      console.log('got error: \'%s\'', error);
+      process.exit(5);
+    });
 });
