@@ -52,6 +52,11 @@ var app = {
                 }, function (error) {
                     console.log('Location permission not granted. Error: ' + error);
                 });
+            } else {
+                jxcore('app.js').loadMainFile(function(ret, err) {
+                    console.log('jxcore loaded');
+                    jxcoreLoaded = true;
+                });
             }
         });
     },
