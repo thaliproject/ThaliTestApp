@@ -3,7 +3,7 @@
 console.log('TestApp started');
 
 // process.env.DEBUG = 'thalisalti:acl';
-process.env.SSDP_NT = 'random-ssdp-nt:' + Math.random();
+// process.env.SSDP_NT = 'random-ssdp-nt:' + Math.random();
 
 process
 .once('uncaughtException', function (error) {
