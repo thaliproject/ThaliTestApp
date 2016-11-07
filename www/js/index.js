@@ -18,7 +18,9 @@
  */
 
 var thaliMode = 'native',
-    jxcoreLoaded = false;
+    jxcoreLoaded = false,
+    thaliStarted = false,
+    thaliDevice;
 
 var app = {
     // Application Constructor
@@ -86,6 +88,9 @@ function initThali (deviceId) {
         alert("jxcore not loaded - please wait");
         return;
     }
+    thaliDevice = deviceId;
+    var initThaliElement = document.getElementById("init" + deviceId);
+    initThaliElement.setAttribute('style', 'background-color:green;');
     jxcore('initThali').call(deviceId, thaliMode, function () {
         console.log('Thali initialized for device #' + deviceId);
     });
@@ -96,8 +101,13 @@ function startThali () {
         alert("jxcore not loaded - please wait");
         return;
     }
+    var startThaliElement = document.getElementById("start");
+    var stopThaliElement = document.getElementById("stop");
+    startThaliElement.setAttribute('style', 'background-color:green;');
+    stopThaliElement.setAttribute('style', 'background-color:initial;');
     jxcore('startThali').call(function () {
         console.log('Thali started');
+        thaliStarted = true;
     });
 }
 
@@ -106,8 +116,13 @@ function stopThali () {
         alert("jxcore not loaded - please wait");
         return;
     }
+    var startThaliElement = document.getElementById("start");
+    var stopThaliElement = document.getElementById("stop");
+    stopThaliElement.setAttribute('style', 'background-color:green;');
+    startThaliElement.setAttribute('style', 'background-color:initial;');
     jxcore('stopThali').call(function () {
         console.log('Thali stopped');
+        thaliStarted = false;
     });
 }
 
@@ -128,6 +143,29 @@ function setMode (mode) {
     newModeElement.setAttribute('style', 'background-color:green;');
 
     thaliMode = mode;
+}
+
+function startTest () {
+    var testCounter = 0;
+    if (!jxcoreLoaded) {
+        alert("jxcore not loaded - please wait");
+        return;
+    }
+    var interval = thaliDevice === 1 ? 5000 : 4000;
+    var startTestElement = document.getElementById('test');
+    startTestElement.setAttribute('style', 'background-color:green;');
+    setInterval(function () {
+        if (testCounter % 3 === 0) {
+            if (thaliStarted) {
+                stopThali();
+            } else {
+                startThali();
+            }
+        } else {
+            addData();
+        }
+        testCounter++;
+    }, 5000);
 }
 
 app.initialize();

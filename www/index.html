@@ -49,12 +49,13 @@
     <div class="buttons">
         <button id="wifi" onclick="setMode('wifi');">WiFi</button>
         <button id="native" class="activemode" onclick="setMode('native');">Native</button><br/>
-        <button onclick="initThali(1);">Init Thali #1</button>
-        <button onclick="initThali(2);">Init Thali #2</button><br/>
-        <button onclick="startThali();">Start Thali</button>
-        <button onclick="stopThali();">Stop Thali</button><br/>
+        <button id="init1" onclick="initThali(1);">Init #1</button>
+        <button id="init2" onclick="initThali(2);">Init #2</button><br/>
+        <button id="start" onclick="startThali();">Start</button>
+        <button id="stop" onclick="stopThali();">Stop</button><br/>
         <button onclick="addData(false);">Add data</button>
-        <button onclick="addData(true);">Add attachment</button>
+        <button onclick="addData(true);">Add attachment</button><br/>
+        <button id="test" onclick="startTest();">Start test</button>
     </div>
 </div>
 <script type="text/javascript" src="cordova.js"></script>

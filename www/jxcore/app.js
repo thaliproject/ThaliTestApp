@@ -90,7 +90,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                     .on('change', function(data) {
                         console.log("TestApp got " + data.doc._id);
                         if (data.doc._id.indexOf("TestAtt") > -1) {
-                            localDB.getAttachment(data.doc._id, 'att.txt')
+                            localDB.getAttachment(data.doc._id, 'attachment')
                                 .then(function (attachmentBuffer) {
                                     Mobile('dbChange').call(attachmentBuffer.toString());
                                 }).catch(function (err) {
@@ -128,7 +128,7 @@ Mobile('addData').registerSync(function (data, addAttachment) {
 
     if (addAttachment) {
         attachment = new Buffer("Attachment from device #" + myDeviceId + ": " + data);
-        localDB.putAttachment("TestAtt" + (new Date().toString()), 'att.txt', attachment, 'text/plain')
+        localDB.putAttachment("TestAtt" + (new Date().toString()), 'attachment', attachment, 'text/plain')
             .then(function (result) {
                 console.log("TestApp inserted attachment");
             }).catch(function (err) {
