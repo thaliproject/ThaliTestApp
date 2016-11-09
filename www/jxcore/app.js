@@ -33,8 +33,10 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
 
     if (mode === 'native') {
         thaliMode = ThaliMobile.networkTypes.NATIVE;
-    } else {
+    } else if (mode === 'wifi') {
         thaliMode = ThaliMobile.networkTypes.WIFI;
+    } else {
+        thaliMode = ThaliMobile.networkTypes.BOTH;
     }
 
     myDeviceId = deviceId;

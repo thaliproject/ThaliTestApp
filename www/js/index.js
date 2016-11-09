@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var thaliMode = 'native',
+var thaliMode = 'both',
     jxcoreLoaded = false,
     thaliStarted = false,
     thaliDevice;
