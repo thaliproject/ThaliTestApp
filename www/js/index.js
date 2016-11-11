@@ -126,13 +126,13 @@ function addAttachment () {
     });
 }
 
-function testByNumber (number) {
+function test (name) {
   if (!jxcoreLoaded) {
-      alert("jxcore not loaded - please wait");
+      alert('jxcore not loaded - please wait');
       return;
   }
-  jxcore('test' + number).call(function () {
-    console.log('test %d finished', number);
+  jxcore(name).call(function () {
+      console.log('test data finished, name: %s', name);
   });
 }
 

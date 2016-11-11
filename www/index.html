@@ -49,6 +49,7 @@
     <div class="buttons">
         <button id="wifi" onclick="setMode('wifi');">WiFi</button>
         <button id="native" class="activemode" onclick="setMode('native');">Native</button><br/>
+        <button id="both" onclick="setMode('both');">Both</button>
         <hr />
         <button onclick="initThali(1)">Init Thali #1</button>
         <button onclick="initThali(2)">Init Thali #2</button>
@@ -59,9 +60,10 @@
         <button onclick="addData()">Add data</button>
         <button onclick="addAttachment()">Add attachment</button>
         <hr />
-        <button onclick="testByNumber(1)">Test 1</button>
-        <button onclick="testByNumber(2)">Test 2</button>
-        <button onclick="testByNumber(3)">Test 3</button>
+        <button onclick="test('testData')">Test data</button>
+        <button onclick="test('testDataToggleWifi')">Test data/toggle wifi</button>
+        <button onclick="test('testDataToggleBluetooth')">Test data/toggle bluetooth</button>
+        <button onclick="test('testDataToggleBoth')">Test data/toggle both</button>
     </div>
 </div>
 <script type="text/javascript" src="cordova.js"></script>

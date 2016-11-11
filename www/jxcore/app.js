@@ -327,7 +327,8 @@ function sendData (round, wantToggleWiFi, wantToggleBluetooth) {
         promises.push(native('setWifiRadioState', false));
       }
       if (wantToggleBluetooth) {
-        promises.push(native('toggleBluetooth', false));
+        // TODO toggle bluetooth is not implemented.
+        // promises.push(native('toggleBluetooth', false));
       }
       return Promise.all(promises);
     })
@@ -346,7 +347,8 @@ function sendData (round, wantToggleWiFi, wantToggleBluetooth) {
         promises.push(native('setWifiRadioState', true));
       }
       if (wantToggleBluetooth) {
-        promises.push(native('toggleBluetooth', true));
+        // TODO toggle bluetooth is not implemented.
+        // promises.push(native('toggleBluetooth', true));
       }
       return Promise.all(promises);
     });
@@ -369,7 +371,7 @@ function infiniteSendData (round, wantToggleWiFi, wantToggleBluetooth) {
     });
 }
 
-Mobile('test1').registerSync(function () {
+Mobile('testData').registerSync(function () {
   infiniteSendData(0, false, false)
     .catch(function (error) {
       console.log('got error: \'%s\'', error);
@@ -377,7 +379,7 @@ Mobile('test1').registerSync(function () {
     });
 });
 
-Mobile('test2').registerSync(function () {
+Mobile('testDataToggleWifi').registerSync(function () {
   infiniteSendData(0, true, false)
     .catch(function (error) {
       console.log('got error: \'%s\'', error);
@@ -385,7 +387,15 @@ Mobile('test2').registerSync(function () {
     });
 });
 
-Mobile('test3').registerSync(function () {
+Mobile('testDataToggleBluetooth').registerSync(function () {
+  infiniteSendData(0, false, true)
+    .catch(function (error) {
+      console.log('got error: \'%s\'', error);
+      process.exit(4);
+    });
+});
+
+Mobile('testDataToggleBoth').registerSync(function () {
   infiniteSendData(0, true, true)
     .catch(function (error) {
       console.log('got error: \'%s\'', error);
