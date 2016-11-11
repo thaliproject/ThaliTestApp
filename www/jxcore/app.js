@@ -60,8 +60,10 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
 
     if (mode === 'native') {
         thaliMode = ThaliMobile.networkTypes.NATIVE;
-    } else {
+    } else if (mode === 'wifi') {
         thaliMode = ThaliMobile.networkTypes.WIFI;
+    } else {
+        thaliMode = ThaliMobile.networkTypes.BOTH;
     }
 
     myDeviceId = deviceId;
@@ -118,7 +120,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                     .on('change', function(data) {
                         console.log("TestApp got " + data.doc._id);
                         if (data.doc._id.indexOf("TestAtt") > -1) {
-                            localDB.getAttachment(data.doc._id, 'att.txt')
+                            localDB.getAttachment(data.doc._id, 'attachment')
                                 .then(function (attachmentBuffer) {
                                     Mobile('dbChange').call(attachmentBuffer.toString());
                                 }).catch(function (err) {
