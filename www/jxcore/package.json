@@ -16,6 +16,7 @@
     "leveldown-mobile": "1.1.1",
     "node-uuid": "^1.4.7",
     "pouchdb": "5.4.5",
-    "proxyquire": "^1.7.10"
+    "proxyquire": "^1.7.10",
+    "tmp": "0.0.28"
   }
 }
