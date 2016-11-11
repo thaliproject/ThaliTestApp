@@ -187,3 +187,5 @@ function startTest () {
         testCounter++;
     }, 5000);
 }
+
+app.initialize();
