@@ -278,11 +278,17 @@ function sendData (round, wantToggleWiFi, wantToggleBluetooth) {
   function send(attempts, timeout) {
     var time = process.hrtime();
 
+    var id = round + ':' + (time[0] + time[1] / 1e9);
+
+    //var attachment = new Buffer('Test attachment ' + id);
+    //return localDB.putAttachment('documentId-' + id, 'attachmentId-' + id, attachment, 'text/plain')
+
     return localDB.put({
-      _id     : 'TestDoc-' + (time[0] + time[1] / 1e9),
+      _id     : 'TestDoc-' + id,
       deviceId: myDeviceId,
       round   : round
     })
+
       .then(function () {
         console.log('sent new doc, round: %d', round);
 
