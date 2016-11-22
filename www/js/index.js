@@ -85,12 +85,10 @@ var app = {
 
 function initThali (deviceId) {
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
     thaliDevice = deviceId;
-    var initThaliElement = document.getElementById("init" + deviceId);
-    initThaliElement.setAttribute('style', 'background-color:green;');
     jxcore('initThali').call(deviceId, thaliMode, function () {
         console.log('Thali initialized for device #' + deviceId);
     });
@@ -98,13 +96,9 @@ function initThali (deviceId) {
 
 function startThali () {
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
-    var startThaliElement = document.getElementById("start");
-    var stopThaliElement = document.getElementById("stop");
-    startThaliElement.setAttribute('style', 'background-color:green;');
-    stopThaliElement.setAttribute('style', 'background-color:initial;');
     jxcore('startThali').call(function () {
         console.log('Thali started');
         thaliStarted = true;
@@ -113,13 +107,9 @@ function startThali () {
 
 function stopThali () {
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
-    var startThaliElement = document.getElementById("start");
-    var stopThaliElement = document.getElementById("stop");
-    stopThaliElement.setAttribute('style', 'background-color:green;');
-    startThaliElement.setAttribute('style', 'background-color:initial;');
     jxcore('stopThali').call(function () {
         console.log('Thali stopped');
         thaliStarted = false;
@@ -129,7 +119,7 @@ function stopThali () {
 var dataCounter = 0;
 function addData (addAttachment) {
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
     jxcore('addData').call('Test data #' + dataCounter, addAttachment, function () {});
@@ -138,7 +128,7 @@ function addData (addAttachment) {
 
 function addAttachment () {
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
     jxcore('addAttachment').call(function () {
@@ -168,7 +158,7 @@ function setMode (mode) {
 function startTest () {
     var testCounter = 0;
     if (!jxcoreLoaded) {
-        alert("jxcore not loaded - please wait");
+        alert('jxcore not loaded - please wait');
         return;
     }
     var interval = thaliDevice === 1 ? 5000 : 4000;
