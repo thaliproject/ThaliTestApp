@@ -4,13 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "./randomizeSSDP.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.4.6",
+    "express": "^4.14.0",
     "express-pouchdb": "1.0.6-thali",
     "leveldown-mobile": "1.1.1",
-    "pouchdb": "5.4.5"
+    "node-uuid": "^1.4.7",
+    "pouchdb": "5.4.5",
+    "proxyquire": "^1.7.10",
+    "tmp": "0.0.28"
   }
 }
