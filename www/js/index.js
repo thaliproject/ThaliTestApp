@@ -162,8 +162,6 @@ function startTest () {
         return;
     }
     var interval = thaliDevice === 1 ? 5000 : 4000;
-    var startTestElement = document.getElementById('test');
-    startTestElement.setAttribute('style', 'background-color:green;');
     setInterval(function () {
         if (testCounter % 3 === 0) {
             if (thaliStarted) {
