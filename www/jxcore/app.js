@@ -1,5 +1,10 @@
 'use strict';
 
+var Promise = global.Promise = require('bluebird');
+Promise.config({
+  longStackTraces: true
+});
+
 console.log('TestApp started');
 
 // process.env.DEBUG = 'thalisalti:acl';
@@ -27,7 +32,7 @@ process
 var ExpressPouchDB          = require('express-pouchdb'),
     PouchDB                 = require('pouchdb'),
     PouchDBGenerator        = require('thali/NextGeneration/utils/pouchDBGenerator'),
-    //ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
+    ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
     ThaliPeerPoolOneAtATime = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolOneAtATime'),
     ThaliReplicationManager = require('thali/NextGeneration/thaliManager'),
     ThaliMobile             = require('thali/NextGeneration/thaliMobile'),
@@ -99,7 +104,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 PouchDB,
                 'testdb',
                 ecdh,
-                //new ThaliPeerPoolDefault(),
+                // new ThaliPeerPoolDefault(),
                 new ThaliPeerPoolOneAtATime(),
                 thaliMode);
 
@@ -127,7 +132,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                                 console.log("TestApp error getting attachment: " + err);
                             });
                         } else {
-                            Mobile('dbChange').call(data.doc.content);
+                            Mobile('dbChange').call(data.doc);
                         }
                     })
                     .on('error', function (err) {
@@ -136,6 +141,10 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                         localDBchanges = registerLocalDBChanges();
                     });
             };
+
+            ThaliMobile.emitter.on('peerAvailabilityChanged', function (peer) {
+                Mobile('peerChange').call(peer);
+            });
 
             localDBchanges = registerLocalDBChanges();
         }
@@ -156,7 +165,8 @@ Mobile('addData').registerSync(function (data) {
     var time = process.hrtime();
     var doc = {
         '_id': 'TestDoc-' + (time[0] + time[1] / 1e9),
-        'content': '[' + myDeviceId + '] ' + data
+        'source': myDeviceId,
+        'content': data
     };
     localDB.put(doc)
         .then(function () {

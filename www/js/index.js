@@ -22,6 +22,66 @@ var thaliMode = 'both',
     thaliStarted = false,
     thaliDevice;
 
+var TCP_NATIVE = 'tcp',
+    BLUETOOTH = 'AndroidBluetooth'
+
+var localDevice = {
+    latestDoc: null,
+    latestTime: null,
+    totalDocs: 0,
+};
+
+var remoteDevice = {
+    id: {
+        wifi: null,
+        native: null,
+    },
+    latestDoc: null,
+    latestTime: null,
+    totalDocs: 0,
+    available: {
+        wifi: false,
+        native: false
+    }
+};
+
+var peers = {};
+
+var localDeviceUI, remoteDeviceUI, peersUI;
+
+function initUI() {
+    var box1 = document.querySelector('[data-device="1"]');
+    var box2 = document.querySelector('[data-device="2"]');
+    var device1ui = {
+        box: box1,
+        lastchange: box1.querySelector('.lastchange'),
+        changetime: box1.querySelector('.changetime'),
+        totaldocs: box1.querySelector('.totaldocs'),
+        availability: box1.querySelector('.availability'),
+    };
+    var device2ui = {
+        box: box2,
+        lastchange: box2.querySelector('.lastchange'),
+        changetime: box2.querySelector('.changetime'),
+        totaldocs: box2.querySelector('.totaldocs'),
+        availability: box2.querySelector('.availability'),
+    };
+
+    if (String(thaliDevice) === '1') {
+        localDeviceUI = device1ui;
+        remoteDeviceUI = device2ui;
+    } else {
+        localDeviceUI = device2ui;
+        remoteDeviceUI = device1ui;
+    }
+    peersUI = {
+        list: document.querySelector('.peerlist')
+    };
+
+    localDeviceUI.box.classList.add('active');
+    remoteDeviceUI.box.classList.remove('active');
+}
+
 var app = {
     // Application Constructor
     initialize: function() {
@@ -72,15 +132,43 @@ var app = {
         console.log('Received Event: ' + id);
     },
     registerFunctions: function () {
-        jxcore('dbChange').register(function (change) {
+        jxcore('dbChange').register(function (doc) {
             var parentElement = document.getElementById('changes');
             var lastChangeElement = parentElement.querySelector('.lastchange');
             var changeTimeElement = parentElement.querySelector('.changetime');
-            lastChangeElement.innerHTML = change;
-            changeTimeElement.innerHTML = new Date().toLocaleTimeString();
-        });
-    }
+            lastChangeElement.innerHTML = '[' + doc.source + '] ' + doc.content;
+            var now = new Date().toLocaleTimeString();
+            changeTimeElement.innerHTML = now;
 
+            var device = (String(thaliDevice) === String(doc.source)) ?
+                         localDevice :
+                         remoteDevice;
+            device.latestDoc = doc.content;
+            device.totalDocs++;
+            device.latestTime = now;
+            render();
+        });
+
+        jxcore('peerChange').register(function (peer) {
+            var id = peer.peerIdentifier;
+            if (peer.peerAvailable) {
+                peers[id] = peer;
+            } else {
+                delete peers[id];
+                var type = peer.connectionType === TCP_NATIVE ? 'wifi': 'native';
+                if (remoteDevice.id[type] === id) {
+                    remoteDevice.id[type] = null;
+                    remoteDevice.available[type] = false;
+                }
+            }
+            render();
+        });
+
+        jxcore('peerHasData').register(function (advertisement) {
+            
+        })
+
+    }
 };
 
 function initThali (deviceId) {
@@ -90,6 +178,7 @@ function initThali (deviceId) {
     }
     thaliDevice = deviceId;
     jxcore('initThali').call(deviceId, thaliMode, function () {
+        initUI();
         console.log('Thali initialized for device #' + deviceId);
     });
 }
@@ -163,17 +252,43 @@ function startTest () {
     }
     var interval = thaliDevice === 1 ? 5000 : 4000;
     setInterval(function () {
-        if (testCounter % 3 === 0) {
-            if (thaliStarted) {
-                stopThali();
-            } else {
-                startThali();
-            }
-        } else {
-            addData();
+        if (testCounter % 15 === 0) {
+            startThali();
+        } else if (testCounter % 15 === 13) {
+            stopThali();
         }
+        addData();
         testCounter++;
     }, 5000);
+}
+
+function render() {
+    localDeviceUI.lastchange.textContent = localDevice.latestDoc;
+    localDeviceUI.changetime.textContent = localDevice.latestTime;
+    localDeviceUI.totaldocs.textContent = localDevice.totalDocs;
+
+    remoteDeviceUI.lastchange.textContent = remoteDevice.latestDoc;
+    remoteDeviceUI.changetime.textContent = remoteDevice.latestTime;
+    remoteDeviceUI.totaldocs.textContent = remoteDevice.totalDocs;
+
+    var av = [];
+    if (remoteDevice.available.wifi) av.push('W');
+    if (remoteDevice.available.native) av.push('N');
+    remoteDeviceUI.availability.textContent = av.join(',');
+
+    var peersContent = document.createDocumentFragment();
+    Object.keys(peers).forEach(function (k) {
+        var peer = peers[k];
+        var li = document.createElement('li');
+        var content = peer.peerIdentifier + ':' + peer.generation;
+        var type = peer.connectionType === TCP_NATIVE ? 'W' : 'N';
+        content += ' [' + type + ']';
+        li.textContent = content;
+        peersContent.appendChild(li);
+    });
+    var list = peersUI.list;
+    list.innerHTML = '';
+    list.appendChild(peersContent);
 }
 
 app.initialize();

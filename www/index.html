@@ -37,7 +37,32 @@
 </head>
 <body>
 <div class="app">
-    <h1>Apache Cordova</h1>
+    <h1>Thali Test</h1>
+    <div class="thali-info">
+        <div class="thali-box" data-device="1">
+            <p>Last change: <span class="lastchange"></span></p>
+            <p>Time received: <span class="changetime"></span></p>
+            <p>Total docs received: <span class="totaldocs"></span></p>
+            <p class="availability-line">
+                Available: <span class="availability"></span>
+            </p>
+        </div><!--
+     --><div class="thali-box" data-device="2">
+            <p>Last change: <span class="lastchange"></span></p>
+            <p>Time received: <span class="changetime"></span></p>
+            <p>Total docs received: <span class="totaldocs"></span></p>
+            <p class="availability-line">
+                Available: <span class="availability"></span>
+            </p>
+        </div>
+
+        <div class="thali-box full">
+            <p>Discovered Peers:</p>
+            <ul class="peerlist"></ul>
+        </div>
+    </div>
+
+
     <div id="deviceready" class="blink">
         <p class="event listening">Connecting to Device</p>
         <p class="event received">Device is Ready</p>
