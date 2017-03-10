@@ -5,6 +5,22 @@ Promise.config({
   longStackTraces: true
 });
 
+var longlog = function (s) {
+    // android logcat has hard limit on the single message length (on my devices
+    // it is 1024 bytes)
+    while (s.length) {
+        var chunk = s.substring(0, 1023);
+        s = s.substring(1023);
+        console.log(chunk);
+        if (s) console.log('…');
+    }
+};
+
+Promise.onPossiblyUnhandledRejection(function (e) {
+    console.log('UNHANDLED REJECTION:', e.message);
+    longlog(e.stack);
+});
+
 console.log('TestApp started');
 
 // process.env.DEBUG = 'thalisalti:acl';
@@ -45,8 +61,6 @@ var ExpressPouchDB          = require('express-pouchdb'),
     localDB,
     localDBchanges,
     myDeviceId = 0;
-
-var Promise = require('bluebird');
 
 var ecdh1 = crypto.createECDH('secp256k1');
 ecdh1.generateKeys();
@@ -99,13 +113,26 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 defaultAdapter: LeveldownMobile
             });
 
+            var peerPool = new ThaliPeerPoolOneAtATime();
+
+            var enqueue = peerPool.enqueue;
+            peerPool.enqueue = function (action) {
+                var result = enqueue.call(this, action);
+                notifyEnqueueChanged(peerPool._inQueue);
+                action.once('killed', function () {
+                    process.nextTick(function () {
+                        notifyEnqueueChanged(peerPool._inQueue);
+                    });
+                });
+                return result;
+            }
+
             manager = new ThaliReplicationManager(
                 ExpressPouchDB,
                 PouchDB,
                 'testdb',
                 ecdh,
-                // new ThaliPeerPoolDefault(),
-                new ThaliPeerPoolOneAtATime(),
+                peerPool,
                 thaliMode);
 
             localDB = new PouchDB('testdb');
@@ -123,7 +150,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
             var registerLocalDBChanges = function () {
                 return localDB.changes(options)
                     .on('change', function(data) {
-                        console.log("TestApp got " + data.doc._id);
+                        console.log("TestApp got " + data.doc.content);
                         if (data.doc._id.indexOf("TestAtt") > -1) {
                             localDB.getAttachment(data.doc._id, 'attachment')
                                 .then(function (attachmentBuffer) {
@@ -170,7 +197,7 @@ Mobile('addData').registerSync(function (data) {
     };
     localDB.put(doc)
         .then(function () {
-            console.log('TestApp inserted doc');
+            console.log('TestApp inserted doc ' + doc.content);
         })
         .catch(function (error) {
             console.log('TestApp error while adding data: \'%s\'', error);
@@ -197,6 +224,22 @@ Mobile('addAttachment').registerSync(function () {
             console.error('got error: \'%s\'', error);
         });
 });
+
+function notifyEnqueueChanged (actions) {
+    var actionsData = Object.keys(actions).map(function (k) {
+        var action = actions[k];
+        return {
+            id: action._id,
+            idType: typeof action._id,
+            peerIdentifier: action._peerIdentifier,
+            connectionType: action._connectionType,
+            actionType: action._actionType,
+            pskIdentity: action._pskIdentity,
+            pskKey: action._pskKey.toString('base64'),
+        }
+    });
+    Mobile('enqueueChange').call(actionsData);
+}
 
 
 var DOCS_COUNT             = 60;

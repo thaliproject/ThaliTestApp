@@ -22,8 +22,7 @@ var thaliMode = 'both',
     thaliStarted = false,
     thaliDevice;
 
-var TCP_NATIVE = 'tcp',
-    BLUETOOTH = 'AndroidBluetooth'
+var TCP_NATIVE = 'tcp';
 
 var localDevice = {
     latestDoc: null,
@@ -46,8 +45,9 @@ var remoteDevice = {
 };
 
 var peers = {};
+var enqueuedActions = [];
 
-var localDeviceUI, remoteDeviceUI, peersUI;
+var localDeviceUI, remoteDeviceUI, peersUI, actionsUI;
 
 function initUI() {
     var box1 = document.querySelector('[data-device="1"]');
@@ -76,6 +76,10 @@ function initUI() {
     }
     peersUI = {
         list: document.querySelector('.peerlist')
+    };
+
+    actionsUI = {
+        list: document.querySelector('.actionlist')
     };
 
     localDeviceUI.box.classList.add('active');
@@ -164,8 +168,13 @@ var app = {
             render();
         });
 
+        jxcore('enqueueChange').register(function (actions) {
+            enqueuedActions = actions;
+            render();
+        });
+
         jxcore('peerHasData').register(function (advertisement) {
-            
+
         })
 
     }
@@ -251,16 +260,45 @@ function startTest () {
         return;
     }
     var interval = thaliDevice === 1 ? 5000 : 4000;
-    setInterval(function () {
-        if (testCounter % 15 === 0) {
-            startThali();
-        } else if (testCounter % 15 === 13) {
-            stopThali();
-        }
+    // setInterval(function () {
+    //     if (testCounter % 15 === 0) {
+    //         startThali();
+    //     } else if (testCounter % 15 === 13) {
+    //         stopThali();
+    //     }
+    //     addData();
+    //     testCounter++;
+    // }, 5000);
+    function run() {
         addData();
-        testCounter++;
-    }, 5000);
+        var time = Math.random() * 3000 + 100 | 0;
+        setTimeout(run, time);
+    }
+    startThali();
+    run();
 }
+
+function tpl(tplString) {
+    return function (data) {
+        return tplString.replace(/\$\{(.*?)\}/g, function (_, prop) {
+            if (Object.hasOwnProperty.call(data, prop)) {
+                return String(data[prop]);
+            }
+            return '';
+        })
+    }
+}
+
+var peerTpl = tpl(
+    '<li>' +
+    '  ${peerIdentifier}:${generation}<br>' +
+    '  [${connectionType}]' +
+    '</li>');
+var actionTpl = tpl(
+    '<li>' +
+    '  #${id}. ${peerIdentifier}<br>' +
+    '  [${connectionType}] ${actionType}' +
+    '</li>');
 
 function render() {
     localDeviceUI.lastchange.textContent = localDevice.latestDoc;
@@ -276,19 +314,67 @@ function render() {
     if (remoteDevice.available.native) av.push('N');
     remoteDeviceUI.availability.textContent = av.join(',');
 
-    var peersContent = document.createDocumentFragment();
-    Object.keys(peers).forEach(function (k) {
-        var peer = peers[k];
-        var li = document.createElement('li');
-        var content = peer.peerIdentifier + ':' + peer.generation;
-        var type = peer.connectionType === TCP_NATIVE ? 'W' : 'N';
-        content += ' [' + type + ']';
-        li.textContent = content;
-        peersContent.appendChild(li);
-    });
-    var list = peersUI.list;
-    list.innerHTML = '';
-    list.appendChild(peersContent);
+    peersUI.list.innerHTML = Object.keys(peers).map(function (k) {
+        return peerTpl(peers[k]);
+    }).join('');
+
+    actionsUI.list.innerHTML = enqueuedActions.map(actionTpl).join('');
+}
+
+function testRender() {
+    thaliDevice = 1;
+    initUI();
+
+    localDevice.latestDoc = 'latest local doc';
+    localDevice.latestTime = '5 seconds ago';
+    localDevice.totalDocs = 10;
+
+    remoteDevice.latestDoc = 'latest remote doc';
+    remoteDevice.latestTime = '15 seconds ago';
+    remoteDevice.totalDocs = 13;
+    remoteDevice.available.wifi = true;
+    remoteDevice.available.native = true;
+
+    peers = {
+        'peerid1': {
+            peerIdentifier: 'peerid1',
+            generation: 0,
+            connectionType: 'tcp',
+        },
+        'peerid2': {
+            peerIdentifier: 'peerid2',
+            generation: 13,
+            connectionType: 'AndroidBluetooth',
+        },
+    };
+
+    enqueuedActions = [
+        {
+            id: 1,
+            peerIdentifier: 'peerid1',
+            connectionType: 'tcp',
+            actionType: 'NotificationAction',
+            pskIdentity: 'pskidentity',
+            pskKey: 'pskkey',
+        },
+        {
+            id: 2,
+            peerIdentifier: 'peerid2',
+            connectionType: 'tcp',
+            actionType: 'NotificationAction',
+            pskIdentity: 'pskidentity',
+            pskKey: 'pskkey',
+        },
+        {
+            id: 3,
+            peerIdentifier: 'peerid2',
+            connectionType: 'AnrdooirdBluetooth',
+            actionType: 'Replication Action',
+            pskIdentity: 'pskidentity2jx',
+            pskKey: 'pskkeyjliu4111',
+        },
+    ];
+    render();
 }
 
 app.initialize();
