@@ -253,6 +253,9 @@ function setMode (mode) {
     thaliMode = mode;
 }
 
+var test1Interval = null;
+var test2Timeout = null;
+
 function startTest () {
     var testCounter = 0;
     if (!jxcoreLoaded) {
@@ -260,22 +263,35 @@ function startTest () {
         return;
     }
     var interval = thaliDevice === 1 ? 5000 : 4000;
-    // setInterval(function () {
-    //     if (testCounter % 15 === 0) {
-    //         startThali();
-    //     } else if (testCounter % 15 === 13) {
-    //         stopThali();
-    //     }
-    //     addData();
-    //     testCounter++;
-    // }, 5000);
+    test1Interval = setInterval(function () {
+        if (testCounter % 15 === 0) {
+            startThali();
+        } else if (testCounter % 15 === 13) {
+            stopThali();
+        }
+        addData();
+        testCounter++;
+    }, 5000);
+}
+
+function startTestNoRestart () {
+    if (!jxcoreLoaded) {
+        alert('jxcore not loaded - please wait');
+        return;
+    }
     function run() {
         addData();
-        var time = Math.random() * 3000 + 100 | 0;
-        setTimeout(run, time);
+        var time = Math.random() * 5000 + 100 | 0;
+        test2Timeout = setTimeout(run, time);
     }
     startThali();
     run();
+}
+
+function stopTests() {
+  console.log('Stopping tests');
+  clearInterval(test1Interval);
+  clearTimeout(test2Timeout);
 }
 
 function tpl(tplString) {

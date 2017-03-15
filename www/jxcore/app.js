@@ -150,7 +150,9 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
             var registerLocalDBChanges = function () {
                 return localDB.changes(options)
                     .on('change', function(data) {
-                        console.log("TestApp got " + data.doc.content);
+                        console.log("TestApp got %s from device #%s",
+                          data.doc.content,
+                          data.doc.source);
                         if (data.doc._id.indexOf("TestAtt") > -1) {
                             localDB.getAttachment(data.doc._id, 'attachment')
                                 .then(function (attachmentBuffer) {
