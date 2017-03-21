@@ -1,13 +1,22 @@
 'use strict';
 
-var Promise = global.Promise = require('bluebird');
-Promise.config({
-  longStackTraces: true
-});
+var as = require('./async-stack');
+var wrapCallback = require('async-listener/glue');
+require('./leveldown-wrap');
+wrapPromise(require('lie'));
+wrapPromise(require('bluebird'));
+
+var f = require('util').format;
+
+var Promise = require('lie');
 
 var longlog = function (s) {
     // android logcat has hard limit on the single message length (on my devices
     // it is 1024 bytes)
+    if (!s) {
+      console.log(s);
+      return;
+    }
     while (s.length) {
         var chunk = s.substring(0, 1023);
         s = s.substring(1023);
@@ -16,10 +25,97 @@ var longlog = function (s) {
     }
 };
 
-Promise.onPossiblyUnhandledRejection(function (e) {
-    console.log('UNHANDLED REJECTION:', e.message);
-    longlog(e.stack);
+function strErr(err) {
+  if (!err) return '<undefined>';
+  var time = err.time ? err.time.toISOString() : '<untimed>';
+  return err.message + ' ' + time + '\n' + err.stack;
+}
+
+function printError(err) {
+  console.log('ERROR:', err.message)
+  longlog(err.stack);
+  console.log('ASYNC STACK:');
+  longlog(err.asyncStack);
+  var keys = Object.keys(err);
+  if (keys.length) {
+    console.log('PROPERTIES:');
+    keys.forEach(function (k) {
+      var v = err[k];
+      if (k === 'cause' && (v instanceof Error)) {
+        return;
+      }
+      try {
+        v = JSON.stringify(v);
+      } catch(e) {
+        v = '[Circular]: ' + String(v);
+      }
+      longlog(f('    %s: %s', k, v));
+    });
+  }
+  if (err.ee) {
+    var ee = err.ee;
+    var eventHistory = ee.__history
+      .filter(function (entry) {
+        var okAction = (
+          entry.action === 'subscribe' ||
+          entry.action === 'unsubscribe'
+        );
+        var okType = (entry.type === 'error');
+        return okAction && okType;
+      })
+      .map(function (entry) {
+        return f(
+          '%s: %s\nStack:\n%s',
+          entry.action,
+          entry.listener.name || '<anonymous>',
+          entry.stack
+        );
+      })
+      .join('\n--------\n');
+    console.log('EVENTS:');
+    longlog(eventHistory);
+  }
+  if (err.cause && (err.cause instanceof Error)) {
+    console.log('--------\nCAUSED BY:');
+    printError(err.cause);
+  }
+}
+
+process.on('unhandledRejection', function(reason, p) {
+  console.log('UNHANDLED REJECTION:', reason.message);
+  printError(reason);
+  var scope = as.getCurrentScope()
+  console.log('Current scope:');
+  if (scope) {
+    longlog(scope.getAsyncStack());
+  } else {
+    console.log('  not found');
+  }
 });
+
+// Promise.onPossiblyUnhandledRejection(function (e) {
+//     console.log('UNHANDLED REJECTION:', e.message);
+//     longlog(e.stack);
+//     longlog(e.asyncStack);
+
+//     // var s = e.socket;
+//     // if (s) {
+//     //   // console.log('SOCKET ID:', s.__id);
+//     //   longlog('CREATED: ' + strErr(s.__created));
+//     //   longlog('EMITTED: ' + strErr(e.__emitted));
+
+//     //   console.log('USAGE:')
+//     //   var errors = Object.keys(s.__errorSubs).map(function (k) {
+//     //     return s.__errorSubs[k].started.concat(s.__errorSubs[k].stopped);
+//     //   });
+//     //   errors = errors.reduce(function (a, b) { return a.concat(b) });
+//     //   errors.sort(function (a, b) {
+//     //     return a.time.getTime() - b.time.getTime();
+//     //   });
+//     //   longlog(errors.map(strErr).join('\n--------\n'));
+//     // }
+//     // throw e;
+// });
 
 console.log('TestApp started');
 
@@ -466,3 +562,25 @@ Mobile('testDataToggleBoth').registerSync(function () {
       process.exit(5);
     });
 });
+
+
+function wrapPromise(Promise) {
+  var t = Promise.prototype.then;
+  Promise.prototype.then = function (a, b) {
+    switch (arguments.length) {
+      case 1:
+        if (typeof a === 'function') a = wrapCallback(a);
+        return t.call(this, a);
+      default:
+        if (typeof a === 'function') a = wrapCallback(a);
+        if (typeof b === 'function') b = wrapCallback(b);
+        return t.call(this, a, b);
+    }
+  }
+
+  var c = Promise.prototype.catch;
+  Promise.prototype.catch = function (a) {
+    if (typeof a === 'function') a = wrapCallback(a);
+    return c.call(this, a);
+  }
+}
