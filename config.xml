@@ -22,5 +22,19 @@
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
+        <preference name="ios-XCBuildConfiguration-ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES" value="YES" />
+        <preference name="ios-XCBuildConfiguration-IPHONEOS_DEPLOYMENT_TARGET" value="10.0" />
+        <preference name="ios-XCBuildConfiguration-SWIFT_VERSION" value="3.0" />
+        <preference name="ios-XCBuildConfiguration-CLANG_WARN_ENUM_CONVERSION" value="YES" />
+        <preference name="ios-XCBuildConfiguration-CLANG_WARN_INFINITE_RECURSION" value="YES" />
+        <preference name="ios-XCBuildConfiguration-CLANG_WARN_SUSPICIOUS_MOVE" value="YES" />
+        <preference name="ios-XCBuildConfiguration-CLANG_WARN_UNREACHABLE_CODE" value="YES" />
+        <preference name="ios-XCBuildConfiguration-ENABLE_STRICT_OBJC_MSGSEND" value="YES" />
+        <preference buildType="debug" name="ios-XCBuildConfiguration-ENABLE_TESTABILITY" value="YES" />
+        <preference buildType="release" name="ios-XCBuildConfiguration-ENABLE_TESTABILITY" value="NO" />
+        <preference name="ios-XCBuildConfiguration-GCC_NO_COMMON_BLOCKS" value="YES" />
+        <preference name="ios-XCBuildConfiguration-GCC_WARN_64_TO_32_BIT_CONVERSION" value="YES" />
+        <preference name="ios-XCBuildConfiguration-SWIFT_OPTIMIZATION_LEVEL" value="-Owholemodule" />
     </platform>
+    <plugin name="cordova-custom-config" spec="~3.1.2" />
 </widget>
