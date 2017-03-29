@@ -20,6 +20,8 @@
         <allow-intent href="market:*" />
     </platform>
     <platform name="ios">
+        <plugin name="cordova-custom-config" spec="~3.1.2" />
+        <hook src="hooks/ios/addEmbeddedFrameworks.js" type="after_platform_add" />
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
         <preference name="ios-XCBuildConfiguration-ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES" value="YES" />

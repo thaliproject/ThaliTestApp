@@ -17,6 +17,7 @@
     "node-uuid": "^1.4.7",
     "pouchdb": "5.4.5",
     "proxyquire": "^1.7.10",
+    "thali": "file:///Users/dersim.davaod/work_hiqo/thali/Thali_CordovaPlugin/thali",
     "tmp": "0.0.28"
   }
 }
