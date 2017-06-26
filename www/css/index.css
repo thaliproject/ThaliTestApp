@@ -103,6 +103,11 @@ h1 {
     display:none;
 }
 
+.event.loaded {
+    background-color: #949210;
+    display:none;
+}
+
 @keyframes fade {
     from { opacity: 1.0; }
     50% { opacity: 0.4; }
