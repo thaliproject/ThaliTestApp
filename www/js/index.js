@@ -48,7 +48,7 @@ var app = {
                 window.ThaliPermissions.requestLocationPermission(function () {
                     console.log('Application has the required permission.');
                     jxcore('app.js').loadMainFile(function(ret, err) {
-                        console.log('jxcore loaded');
+                        app.loadedJXCore('deviceready');
                         jxcoreLoaded = true;
                     });
                 }, function (error) {
@@ -71,6 +71,15 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
         console.log('Received Event: ' + id);
     },
+    loadedJXCore: function(id) {
+        var parentElement = document.getElementById(id);
+        var receivedElement = parentElement.querySelector('.received');
+        var loadedElement = parentElement.querySelector('.loaded');
+        loadedElement.setAttribute('style', 'display:block;');
+        receivedElement.setAttribute('style', 'display:none;');
+        console.log('jxcore loaded');
+    },
+
     registerFunctions: function () {
         jxcore('dbChange').register(function (change) {
             var parentElement = document.getElementById('changes');
