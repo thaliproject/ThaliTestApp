@@ -9,6 +9,9 @@ export JX_NPM_JXB
 
 ../Thali_CordovaPlugin/thali/install/setUpDesktop.sh
 
+# cordova-custom-config allows to use custom flags in config.xml
+cordova plugin add cordova-custom-config --fetch --save
+
 mkdir -p thaliDontCheckIn/localdev
 cordova platform add ios
 cordova platform add android
