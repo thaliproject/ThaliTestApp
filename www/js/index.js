@@ -90,6 +90,7 @@ function initThali (deviceId) {
     }
     thaliDevice = deviceId;
     jxcore('initThali').call(deviceId, thaliMode, function () {
+        document.getElementById("init" + deviceId).setAttribute('style', 'background-color:green;');
         console.log('Thali initialized for device #' + deviceId);
     });
 }
@@ -100,6 +101,8 @@ function startThali () {
         return;
     }
     jxcore('startThali').call(function () {
+        document.getElementById("start").setAttribute('style', 'background-color:green;');
+        document.getElementById("stop").setAttribute('style', 'background-color:initial;');
         console.log('Thali started');
         thaliStarted = true;
     });
@@ -111,6 +114,8 @@ function stopThali () {
         return;
     }
     jxcore('stopThali').call(function () {
+        document.getElementById("stop").setAttribute('style', 'background-color:green;');
+        document.getElementById("start").setAttribute('style', 'background-color:initial;');
         console.log('Thali stopped');
         thaliStarted = false;
     });

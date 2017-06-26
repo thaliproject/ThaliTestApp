@@ -1,6 +1,20 @@
+# IntelliJ
+.idea/
+.gradle
+gradle/
+gradlew
+gradlew.bat
+*.iml
+
+# Nodejs
+node_modules
+npm-debug.log
+
 info.txt
 platforms
 plugins
 thaliDontCheckIn
+node_modules
 www/jxcore/node_modules/
 www/jxcore/SSDP.js
+
