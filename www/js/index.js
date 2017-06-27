@@ -56,7 +56,7 @@ var app = {
                 });
             } else {
                 jxcore('app.js').loadMainFile(function(ret, err) {
-                    console.log('jxcore loaded');
+                    app.loadedJXCore('deviceready');
                     jxcoreLoaded = true;
                 });
             }
