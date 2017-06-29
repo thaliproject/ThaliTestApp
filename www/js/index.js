@@ -156,7 +156,10 @@ function stopAddingData () {
 }
 
 function cleanDB() {
-    localDB.destroy();    
+    localDB.destroy()
+        .then(function () {
+            dataCounter = 0;
+        });
 }
 
 function addAttachment () {
