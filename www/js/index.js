@@ -140,6 +140,20 @@ function addData (addAttachment) {
     dataCounter++;
 }
 
+var addDataInfinitelyInterval;
+function addDataInfinitely () {
+    var e = document.getElementById("timeoutValue");
+    var timeout = e.options[e.selectedIndex].value;
+
+    addDataInfinitelyInterval = setInterval(function () {
+        addData();
+    }, timeout);
+}
+
+function stopAddingData () {
+    clearInterval(addDataInfinitelyInterval);
+}
+
 function addAttachment () {
     if (!jxcoreLoaded) {
         alert('jxcore not loaded - please wait');
