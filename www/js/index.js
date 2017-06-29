@@ -156,10 +156,10 @@ function stopAddingData () {
 }
 
 function cleanDB() {
-    localDB.destroy()
-        .then(function () {
-            dataCounter = 0;
-        });
+    jxcore('cleanLocalDB').call(function () {
+        dataCounter = 0;
+        alert('Local database was destroyed. Remember to reinit thali!');
+    });
 }
 
 function addAttachment () {

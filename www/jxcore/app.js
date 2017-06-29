@@ -420,6 +420,14 @@ function infiniteSendData (round, wantToggleWiFi, wantToggleBluetooth) {
     });
 }
 
+Mobile('cleanLocalDB').registerSync(function () {
+    if (localDB) {
+        localDB.destroy().then(function () {
+            localDB = new PouchDB('testdb');
+        });
+    }
+});
+
 Mobile('testData').registerSync(function () {
   infiniteSendData(0, false, false)
     .catch(function (error) {
