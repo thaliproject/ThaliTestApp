@@ -43,15 +43,35 @@ var ExpressPouchDB          = require('express-pouchdb'),
 
 var Promise = require('bluebird');
 
+var keys = [
+    {
+        publicKey: 'BNTJE6l6zcgm9yLjRyXn8Z1f2jA5m/60gYIDaJxiLDYJMUmV/5LJMHBSA9RVmjp9tyWQWkn0BWk6cvQiWpt86IE=',
+        privateKey: '24lf26NsRnaxvruH3ui73q5vDGYb0phrJVdgUngOFp8='
+    },
+    {
+        publicKey: 'BHaqGoN4VGmYUmK2kJ0UME36mBSKfcp9uXYvnxBLvwCLie05ieFCGJI2wGNkCplMDa7Wm18Y4b69rL7fkKFCFM8=',
+        privateKey: 'xRqiCIH1ka1omulZOzQxYJsX1IQOZRALu0+3miOuf2I='
+    },
+    {
+        publicKey: 'BFxk8N7+usEhgrthfquA/CFlAJ5rqQyX4wci/WdP7BKVC9/2lwIihKWycccWHTMCaj5soaPDLxprANxnfWzHvpQ=',
+        privateKey: 'vPW1OtKoMFKg972t3V3NwHk8w6ER/mIkiIZVNo8NOGk='
+    }
+];
+
 var ecdh1 = crypto.createECDH('secp256k1');
 ecdh1.generateKeys();
-ecdh1.setPublicKey('BNTJE6l6zcgm9yLjRyXn8Z1f2jA5m/60gYIDaJxiLDYJMUmV/5LJMHBSA9RVmjp9tyWQWkn0BWk6cvQiWpt86IE=', 'base64');
-ecdh1.setPrivateKey('24lf26NsRnaxvruH3ui73q5vDGYb0phrJVdgUngOFp8=', 'base64');
+ecdh1.setPublicKey(keys[0].publicKey, 'base64');
+ecdh1.setPrivateKey(keys[0].privateKey, 'base64');
 
 var ecdh2 = crypto.createECDH('secp256k1');
 ecdh2.generateKeys();
-ecdh2.setPublicKey('BHaqGoN4VGmYUmK2kJ0UME36mBSKfcp9uXYvnxBLvwCLie05ieFCGJI2wGNkCplMDa7Wm18Y4b69rL7fkKFCFM8=', 'base64');
-ecdh2.setPrivateKey('xRqiCIH1ka1omulZOzQxYJsX1IQOZRALu0+3miOuf2I=', 'base64');
+ecdh2.setPublicKey(keys[1].publicKey, 'base64');
+ecdh2.setPrivateKey(keys[1].privateKey, 'base64');
+
+var ecdh3 = crypto.createECDH('secp256k1');
+ecdh3.generateKeys();
+ecdh3.setPublicKey(keys[2].publicKey, 'base64');
+ecdh3.setPrivateKey(keys[2].privateKey, 'base64');
 
 Mobile('initThali').registerSync(function (deviceId, mode) {
     var ecdh,
@@ -67,14 +87,23 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
     }
 
     myDeviceId = deviceId;
-    if (deviceId === 1) {
-        console.log('thali Using device 1 keys');
-        ecdh = ecdh1;
-        keysToUse = [ecdh2.getPublicKey()];
-    } else {
-        console.log('thali Using device 2 keys');
-        ecdh = ecdh2;
-        keysToUse = [ecdh1.getPublicKey()];
+
+    switch (deviceId) {
+        case 1:
+            console.log('thali Using device 1 keys');
+            ecdh = ecdh1;
+            keysToUse = [ecdh2.getPublicKey(), ecdh3.getPublicKey()];
+            break;
+        case 2:
+            console.log('thali Using device 2 keys');
+            ecdh = ecdh2;
+            keysToUse = [ecdh1.getPublicKey(), ecdh3.getPublicKey()];
+            break;
+        case 3:
+            console.log('thali Using device 3 keys');
+            ecdh = ecdh3;
+            keysToUse = [ecdh3.getPublicKey(), ecdh2.getPublicKey()];
+            break;
     }
 
     Mobile.getDocumentsPath(function(err, location) {
@@ -189,7 +218,7 @@ Mobile('addAttachment').registerSync(function () {
 });
 
 
-var DOCS_COUNT             = 60;
+var DOCS_COUNT             = 100;
 var DOC_SEND_TIMEOUT       = 1000;
 var DOC_SEARCH_TIMEOUT     = 2 * 60 * 1000;
 var NETWORK_TOGGLE_TIMEOUT = 1 * 60 * 1000;
