@@ -155,6 +155,10 @@ function stopAddingData () {
     clearInterval(addDataInfinitelyInterval);
 }
 
+function cleanDB() {
+    localDB.destroy();    
+}
+
 function addAttachment () {
     if (!jxcoreLoaded) {
         alert('jxcore not loaded - please wait');
