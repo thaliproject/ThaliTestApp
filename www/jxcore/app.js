@@ -27,7 +27,7 @@ process
 var ExpressPouchDB          = require('express-pouchdb'),
     PouchDB                 = require('pouchdb'),
     PouchDBGenerator        = require('thali/NextGeneration/utils/pouchDBGenerator'),
-    //ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
+    ThaliPeerPoolDefault    = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolDefault'),
     ThaliPeerPoolOneAtATime = require('thali/NextGeneration/thaliPeerPool/thaliPeerPoolOneAtATime'),
     ThaliReplicationManager = require('thali/NextGeneration/thaliManager'),
     ThaliMobile             = require('thali/NextGeneration/thaliMobile'),
@@ -73,10 +73,11 @@ ecdh3.generateKeys();
 ecdh3.setPublicKey(keys[2].publicKey, 'base64');
 ecdh3.setPrivateKey(keys[2].privateKey, 'base64');
 
-Mobile('initThali').registerSync(function (deviceId, mode) {
+Mobile('initThali').registerSync(function (deviceId, mode, peerPoolType) {
     var ecdh,
         dbPrefix,
-        thaliMode;
+        thaliMode,
+        peerPool;
 
     if (mode === 'native') {
         thaliMode = ThaliMobile.networkTypes.NATIVE;
@@ -106,6 +107,17 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
             break;
     }
 
+    switch (peerPoolType) {
+        case 'default':
+            peerPool = new ThaliPeerPoolDefault();
+            break;
+        case 'oneatatime':
+            peerPool = new ThaliPeerPoolOneAtATime();
+            break;
+        default:
+            console.log('Unsupported peer pool type');
+    }
+   
     Mobile.getDocumentsPath(function(err, location) {
         if (err) {
             console.log('TestApp Error getting path');
@@ -128,8 +140,7 @@ Mobile('initThali').registerSync(function (deviceId, mode) {
                 PouchDB,
                 'testdb',
                 ecdh,
-                //new ThaliPeerPoolDefault(),
-                new ThaliPeerPoolOneAtATime(),
+                peerPool,
                 thaliMode);
 
             localDB = new PouchDB('testdb');

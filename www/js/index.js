@@ -20,7 +20,8 @@
 var thaliMode = 'both',
     jxcoreLoaded = false,
     thaliStarted = false,
-    thaliDevice;
+    thaliDevice,
+    peerPoolType = 'default';
 
 var app = {
     // Application Constructor
@@ -98,7 +99,7 @@ function initThali (deviceId) {
         return;
     }
     thaliDevice = deviceId;
-    jxcore('initThali').call(deviceId, thaliMode, function () {
+    jxcore('initThali').call(deviceId, thaliMode, peerPoolType, function () {
         document.getElementById("init" + deviceId).setAttribute('style', 'background-color:green;');
         console.log('Thali initialized for device #' + deviceId);
     });
@@ -181,6 +182,15 @@ function setMode (mode) {
     newModeElement.setAttribute('style', 'background-color:green;');
 
     thaliMode = mode;
+}
+
+function setPeerPool (type) {
+    var currentType = document.getElementById(peerPoolType);
+    var newType = document.getElementById(type);
+    currentType.setAttribute('style', 'background-color:initial;');
+    newType.setAttribute('style', 'background-color:green;');
+
+    peerPoolType = type;
 }
 
 function startTest () {
