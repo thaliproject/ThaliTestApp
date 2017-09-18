@@ -82,12 +82,24 @@ var app = {
     },
 
     registerFunctions: function () {
-        jxcore('dbChange').register(function (change) {
+        jxcore('dbChange').register(function (change, timeSent) {
             var parentElement = document.getElementById('changes');
             var lastChangeElement = parentElement.querySelector('.lastchange');
             var changeTimeElement = parentElement.querySelector('.changetime');
+            var dataSizeElement = parentElement.querySelector('.datasize');
+
             lastChangeElement.innerHTML = change;
             changeTimeElement.innerHTML = new Date().toLocaleTimeString();
+            dataSizeElement.innerHTML = change.length;
+
+            if (timeSent) {
+                var syncTime = (Date.now() - timeSent);
+                parentElement.querySelector('.synctime').innerHTML = syncTime.toString();
+                // two bytes per char
+                // we got time in ms and size in bits (number of chars times size per char), so as the result
+                // we get Mbits/s
+                parentElement.querySelector('.transferrate').innerHTML = ((change.length * 2 * 8 / syncTime * 1000) / 1000).toString() + ' Mbps';
+            }
         });
     }
 

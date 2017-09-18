@@ -32,6 +32,7 @@ var ExpressPouchDB          = require('express-pouchdb'),
     ThaliReplicationManager = require('thali/NextGeneration/thaliManager'),
     ThaliMobile             = require('thali/NextGeneration/thaliMobile'),
     crypto                  = require('crypto'),
+    randomString            = require('randomstring'),
     LeveldownMobile         = require('leveldown-mobile'),
     fs                      = require('fs'),
     path                    = require('path'),
@@ -159,10 +160,13 @@ Mobile('initThali').registerSync(function (deviceId, mode, peerPoolType) {
                 return localDB.changes(options)
                     .on('change', function(data) {
                         console.log("TestApp got " + data.doc._id);
-                        if (data.doc._id.indexOf("TestAtt") > -1) {
+                        if (data.doc._id.indexOf("attachment") > -1) {
                             localDB.getAttachment(data.doc._id, 'attachment')
                                 .then(function (attachmentBuffer) {
-                                    Mobile('dbChange').call(attachmentBuffer.toString());
+                                    var stringBuffer = attachmentBuffer.toString();
+                                    var sentTimestamp = parseInt(stringBuffer.substring(stringBuffer.indexOf('timeSent:')).replace('timeSent:', ''));
+                                    //var sentTimestamp = parseInt(stringBuffer.substring(stringBuffer.lastIndexOf(':')));
+                                    Mobile('dbChange').call(attachmentBuffer.toString(), sentTimestamp);
                                 }).catch(function (err) {
                                 console.log("TestApp error getting attachment: " + err);
                             });
@@ -210,16 +214,19 @@ Mobile('addData').registerSync(function (data) {
 var attachmentIndex = 0;
 
 Mobile('addAttachment').registerSync(function () {
-    var attachment = new Buffer('attachment/attachment:' + attachmentIndex + ':' + new Date());
+    var dataLength = 64 * 1024;
+    var attachmentContent = randomString.generate(dataLength);
+    //var attachmentSize = Buffer.byteLength(attachmentContent, 'utf8');
+    var attachment = new Buffer('attachment/attachment:' + attachmentContent + ':timeSent:' + Date.now());
     attachmentIndex ++;
 
     localDB
-    .putAttachment(
-      attachment.toString(),
-      'attachment',
-      attachment,
-      'text/plain'
-    )
+        .putAttachment(
+          attachment.toString(),
+          'attachment',
+          attachment,
+          'text/plain'
+        )
         .then(function () {
             console.log('sent attachment');
         })
