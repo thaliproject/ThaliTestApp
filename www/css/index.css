@@ -47,10 +47,10 @@ body {
 
 /* Portrait layout (default) */
 .app {
-    padding-top: 190px;
+    /*padding-top: 190px;*/
     text-align: center;
 
-    background: url('../img/logo.png') no-repeat center 10px;
+    /*background: url('../img/logo.png') no-repeat center 10px;*/
 
     /* background:url(../img/logo.png) no-repeat center top; 170px x 200px */
     /* position:absolute; position in the center of the screen */
@@ -138,7 +138,7 @@ h1 {
     font-size: 1.8em;
 }
 .buttons hr {
-  margin: 10px 5px;
+    margin: 10px 5px;
 }
 .buttons button.activemode {
     background-color: green;

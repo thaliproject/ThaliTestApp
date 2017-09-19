@@ -90,7 +90,7 @@ var app = {
 
             lastChangeElement.innerHTML = change;
             changeTimeElement.innerHTML = new Date().toLocaleTimeString();
-            dataSizeElement.innerHTML = change.length;
+            dataSizeElement.innerHTML = change.length * 2;
 
             if (timeSent) {
                 var syncTime = (Date.now() - timeSent);
@@ -179,7 +179,11 @@ function addAttachment () {
         alert('jxcore not loaded - please wait');
         return;
     }
-    jxcore('addAttachment').call(function () {
+
+    var e = document.getElementById("attachmentSize");
+    var attSize = e.options[e.selectedIndex].value;
+    
+    jxcore('addAttachment').call(attSize, function () {
         console.log('adding attachment');
     });
 }

@@ -211,14 +211,10 @@ Mobile('addData').registerSync(function (data) {
         });
 });
 
-var attachmentIndex = 0;
-
-Mobile('addAttachment').registerSync(function () {
-    var dataLength = 64 * 1024;
+Mobile('addAttachment').registerSync(function (attSize) {
+    var dataLength = parseInt(attSize) * 1024 / 2; // kB to bytes, two bytes per char
     var attachmentContent = randomString.generate(dataLength);
-    //var attachmentSize = Buffer.byteLength(attachmentContent, 'utf8');
     var attachment = new Buffer('attachment/attachment:' + attachmentContent + ':timeSent:' + Date.now());
-    attachmentIndex ++;
 
     localDB
         .putAttachment(

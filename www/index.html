@@ -51,8 +51,6 @@
         Speed: <span class="transferrate"></span>
     </div>
     <div class="buttons">
-        <button id="default" onclick="setPeerPool('default');">Peer Pool Default</button>
-        <button id="oneatatime" onclick="setPeerPool('oneatatime');">Peer Pool OneAtATime</button>
         <button id="wifi" onclick="setMode('wifi');">WiFi</button>
         <button id="native" onclick="setMode('native');">Native</button><br/>
         <button id="both" class="activemode" onclick="setMode('both');">Both</button>
@@ -77,13 +75,15 @@
         <button onclick="stopAddingData()">Stop adding data infinitely</button>
         <hr />
         <button onclick="addAttachment()">Add attachment</button>
-        <hr />
-        <button onclick="startTest()">Start test</button>
-        <hr />
-        <button onclick="test('testData')">Test data</button>
-        <button onclick="test('testDataToggleWifi')">Test data/toggle wifi</button>
-        <button onclick="test('testDataToggleBluetooth')">Test data/toggle bluetooth</button>
-        <button onclick="test('testDataToggleBoth')">Test data/toggle both</button>
+        <select id ="attachmentSize">
+            <option value="32">32 kB</option>
+            <option value="64">64 kB</option>
+            <option value="128">128 kB</option>
+            <option value="512">512 kB</option>
+            <option value="1024">1 MB</option>
+            <option value="2048">2 MB</option>
+            <option value="5120">5 MB</option>
+        </select>
         <hr />
         <button onclick="cleanDB()">Clean DB</button>
     </div>
