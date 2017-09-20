@@ -160,19 +160,40 @@ Mobile('initThali').registerSync(function (deviceId, mode, peerPoolType) {
                 return localDB.changes(options)
                     .on('change', function(data) {
                         console.log("TestApp got " + data.doc._id);
-                        if (data.doc._id.indexOf("attachment") > -1) {
-                            localDB.getAttachment(data.doc._id, 'attachment')
-                                .then(function (attachmentBuffer) {
-                                    var stringBuffer = attachmentBuffer.toString();
-                                    var sentTimestamp = parseInt(stringBuffer.substring(stringBuffer.indexOf('timeSent:')).replace('timeSent:', ''));
-                                    //var sentTimestamp = parseInt(stringBuffer.substring(stringBuffer.lastIndexOf(':')));
-                                    Mobile('dbChange').call(attachmentBuffer.toString(), sentTimestamp);
-                                }).catch(function (err) {
-                                console.log("TestApp error getting attachment: " + err);
+
+                        var dataContentPromise = function () {
+                            return new Promise(function(resolve, reject) {
+                                if (data.doc._id.indexOf("attachment") > -1) {
+                                    localDB.getAttachment(data.doc._id, 'attachment')
+                                        .then(function (attachmentBuffer) {
+                                            resolve(attachmentBuffer.toString());
+                                        }).catch(function (err) {
+                                        reject();
+                                        console.log("TestApp error getting attachment: " + err);
+                                    });
+                                } else {
+                                    resolve(data.doc.content);
+                                }
                             });
-                        } else {
-                            Mobile('dbChange').call(data.doc.content);
-                        }
+                        };
+
+                        var sentTimestampPromise = function (dataContent) {
+                            return new Promise(function(resolve, reject) {
+                                var senderId = dataContent.substr(dataContent.indexOf('[') + 1, dataContent.indexOf('] ') - 1);
+
+                                if (parseInt(senderId) !== parseInt(deviceId)) {
+                                    resolve(parseInt(dataContent.substring(dataContent.indexOf('timeSent:')).replace('timeSent:', '')));
+                                } else {
+                                    resolve(-1);
+                                }
+                            })
+                        };
+
+                        dataContentPromise().then(function (dataContent) {
+                            sentTimestampPromise(dataContent).then(function (sentTimestamp) {
+                                Mobile('dbChange').call(dataContent, sentTimestamp);
+                            });
+                        });
                     })
                     .on('error', function (err) {
                         console.log(err);
@@ -197,10 +218,11 @@ Mobile('stopThali').registerSync(function () {
 });
 
 Mobile('addData').registerSync(function (data) {
+    var content = data ? data : randomString.generate(16);
     var time = process.hrtime();
     var doc = {
         '_id': 'TestDoc-' + (time[0] + time[1] / 1e9),
-        'content': '[' + myDeviceId + '] ' + data
+        'content': '[' + myDeviceId + '] ' + 'data:' + content + 'timeSent:' + Date.now()
     };
     localDB.put(doc)
         .then(function () {
@@ -213,7 +235,7 @@ Mobile('addData').registerSync(function (data) {
 
 Mobile('addAttachment').registerSync(function (attSize) {
     var dataLength = parseInt(attSize) * 1024 / 2; // kB to bytes, two bytes per char
-    var attachmentContent = randomString.generate(dataLength);
+    var attachmentContent = '[' + myDeviceId + '] ' + randomString.generate(dataLength);
     var attachment = new Buffer('attachment/attachment:' + attachmentContent + ':timeSent:' + Date.now());
 
     localDB

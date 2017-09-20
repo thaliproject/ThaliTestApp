@@ -92,17 +92,20 @@ var app = {
             changeTimeElement.innerHTML = new Date().toLocaleTimeString();
             dataSizeElement.innerHTML = change.length * 2;
 
-            if (timeSent) {
-                var syncTime = (Date.now() - timeSent);
-                parentElement.querySelector('.synctime').innerHTML = syncTime.toString();
+            var syncTimeValue = '', transferRateValue = '';
+
+            if (timeSent > -1) {
+                syncTimeValue = Date.now() - timeSent;
                 // two bytes per char
                 // we got time in ms and size in bits (number of chars times size per char), so as the result
                 // we get Mbits/s
-                parentElement.querySelector('.transferrate').innerHTML = ((change.length * 2 * 8 / syncTime * 1000) / 1000).toString() + ' Mbps';
+                transferRateValue = (((change.length * 2 * 8 / 1024) / (syncTimeValue / 1000)) / 1000).toString() + ' Mbps';
             }
+
+            parentElement.querySelector('.synctime').innerHTML = syncTimeValue.toString();
+            parentElement.querySelector('.transferrate').innerHTML = transferRateValue;
         });
     }
-
 };
 
 function initThali (deviceId) {
@@ -144,12 +147,12 @@ function stopThali () {
 }
 
 var dataCounter = 0;
-function addData (addAttachment) {
+function addData () {
     if (!jxcoreLoaded) {
         alert('jxcore not loaded - please wait');
         return;
     }
-    jxcore('addData').call('Test data #' + dataCounter, addAttachment, function () {});
+    jxcore('addData').call(function () {});
     dataCounter++;
 }
 
