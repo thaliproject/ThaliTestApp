@@ -234,7 +234,7 @@ Mobile('addData').registerSync(function (data) {
 });
 
 Mobile('addAttachment').registerSync(function (attSize) {
-    var dataLength = parseInt(attSize) * 1024 / 2; // kB to bytes, two bytes per char
+    var dataLength = parseInt(attSize) * 1024;
     var attachmentContent = '[' + myDeviceId + '] ' + randomString.generate(dataLength);
     var attachment = new Buffer('attachment/attachment:' + attachmentContent + ':timeSent:' + Date.now());
 
