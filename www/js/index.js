@@ -99,7 +99,7 @@ var app = {
                 // two bytes per char
                 // we got time in ms and size in bits (number of chars times size per char), so as the result
                 // we get Mbits/s
-                transferRateValue = ((((change.length * 8 / 1024) / (syncTimeValue)) * 1000) / 10e6).toString() + ' Mbps';
+                transferRateValue = (((change.length * 8 / syncTimeValue) * 1000) / 10e6).toString() + ' Mbps';
             }
 
             parentElement.querySelector('.synctime').innerHTML = syncTimeValue.toString();
