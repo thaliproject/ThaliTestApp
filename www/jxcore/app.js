@@ -235,12 +235,13 @@ Mobile('addData').registerSync(function (data) {
 
 Mobile('addAttachment').registerSync(function (attSize) {
     var dataLength = parseInt(attSize) * 1024;
+    var time = process.hrtime();
     var attachmentContent = '[' + myDeviceId + '] ' + randomString.generate(dataLength);
     var attachment = new Buffer('attachment/attachment:' + attachmentContent + ':timeSent:' + Date.now());
 
     localDB
         .putAttachment(
-          attachment.toString(),
+          (time[0] + time[1] / 1e9),
           'attachment',
           attachment,
           'text/plain'
