@@ -241,7 +241,7 @@ Mobile('addAttachment').registerSync(function (attSize) {
 
     localDB
         .putAttachment(
-          'attachment' + (time[0] + time[1] / 1e9),
+          'attachment' + randomString.generate(16),
           'attachment',
           attachment,
           'text/plain'
