@@ -15,10 +15,10 @@
     "express-pouchdb": "1.0.6-thali",
     "leveldown-mobile": "1.1.1",
     "node-uuid": "^1.4.7",
-    "pouchdb": "6.2.0",
+    "pouchdb": "5.4.5",
     "proxyquire": "^1.7.10",
     "randomstring": "1.1.5",
-    "thali": "file:///Users/Lesnik/Workspace/Webstorm/mlesnic_thaliTestApp/Thali_CordovaPlugin/thali",
+    "thali": "file:///Users/Lesnik/Workspace/Webstorm/NativeLibThaliTestApp_enrico_fix/Thali_CordovaPlugin/thali",
     "tmp": "0.0.28"
   }
 }
